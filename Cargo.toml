@@ -2,6 +2,14 @@
 name = "advent-of-code-2018"
 version = "0.1.0"
 authors = ["haraldmaida"]
+license = "MIT"
+
+description = """Solving Advent of Code Puzzles for 2018"""
+
+readme = "README.md"
+repository = "https://github.com/haraldmaida/advent-of-code-2018"
+keywords = ["advent", "puzzle"]
+
 edition = "2018"
 
 [lib]
