@@ -30,7 +30,7 @@ pub fn accumulate(input: &[Frequency]) -> Frequency {
 
 #[aoc(day1, part2)]
 pub fn calibrate(input: &[Frequency]) -> Frequency {
-    let mut history = HashSet::with_capacity(16);
+    let mut history = HashSet::with_capacity(input.len());
     let mut accumulated = 0;
     history.insert(accumulated);
     'rerun: loop {
