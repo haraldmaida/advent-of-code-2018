@@ -70,7 +70,7 @@ pub type Frequency = i32;
 #[aoc_generator(day1)]
 pub fn parse(input: &str) -> Vec<Frequency> {
     input
-        .split('\n')
+        .lines()
         .filter(|s| !s.is_empty())
         .enumerate()
         .map(|(idx, text)| {

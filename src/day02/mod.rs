@@ -77,7 +77,7 @@ use std::collections::HashMap;
 #[aoc_generator(day2)]
 pub fn parse(input: &str) -> Vec<String> {
     input
-        .split('\n')
+        .lines()
         .filter(|s| !s.is_empty())
         .map(ToOwned::to_owned)
         .collect()
