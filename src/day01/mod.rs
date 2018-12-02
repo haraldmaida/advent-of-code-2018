@@ -60,7 +60,7 @@
 //!
 //! What is the first frequency your device reaches twice?
 //!
-//! [Advent of Code - Day 1](https://adventofcode.com/2018/day/1)
+//! [Advent of Code 2018 - Day 1](https://adventofcode.com/2018/day/1)
 
 use std::collections::HashSet;
 use std::str::FromStr;

@@ -1,4 +1,4 @@
-//! Advent of Code 2018
+//! # Advent of Code 2018
 //!
 //! "We've detected some temporal anomalies," one of Santa's Elves at the
 //! Temporal Anomaly Research and Detection Instrument Station tells you. She
@@ -28,6 +28,7 @@ extern crate aoc_runner;
 #[macro_use]
 extern crate aoc_runner_derive;
 
-pub mod day1;
+pub mod day01;
+pub mod day02;
 
 aoc_lib! { year = 2018 }
