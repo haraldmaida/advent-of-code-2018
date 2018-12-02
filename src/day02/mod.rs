@@ -46,6 +46,30 @@
 //!
 //! What is the checksum for your list of box IDs?
 //!
+//! ## Part 2
+//!
+//! Confident that your list of box IDs is complete, you're ready to find the
+//! boxes full of prototype fabric.
+//!
+//! The boxes will have IDs which differ by exactly one character at the same
+//! position in both strings. For example, given the following box IDs:
+//!
+//!   * abcde
+//!   * fghij
+//!   * klmno
+//!   * pqrst
+//!   * fguij
+//!   * axcye
+//!   * wvxyz
+//!
+//! The IDs abcde and axcye are close, but they differ by two characters (the
+//! second and fourth). However, the IDs fghij and fguij differ by exactly one
+//! character, the third (h and u). Those must be the correct boxes.
+//!
+//! What letters are common between the two correct box IDs? (In the example
+//! above, this is found by removing the differing character from either ID,
+//! producing fgij.)
+//!
 //! [Advent of Code 2018 - Day 2](https://adventofcode.com/2018/day/2)
 
 use std::collections::HashMap;
@@ -87,6 +111,25 @@ pub fn checksum(box_ids: &[String]) -> u32 {
     });
 
     sum_of_twos * sum_of_threes
+}
+
+#[aoc(day2, part2)]
+pub fn search_prototype_boxes(box_ids: &[String]) -> String {
+    let mut found_id = None;
+    'id_search: for (idx, id1) in box_ids.iter().enumerate() {
+        for id2 in box_ids.iter().skip(idx + 1) {
+            let mut common_letters = String::with_capacity(id1.len());
+            id1.chars()
+                .zip(id2.chars())
+                .filter_map(|(chr1, chr2)| if chr1 == chr2 { Some(chr1) } else { None })
+                .for_each(|chr| common_letters.push(chr));
+            if common_letters.len() + 1 == id1.len() {
+                found_id = Some(common_letters);
+                break 'id_search;
+            }
+        }
+    }
+    found_id.unwrap_or_else(|| format!("no correct box id found"))
 }
 
 #[cfg(test)]

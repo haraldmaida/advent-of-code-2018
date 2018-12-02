@@ -18,3 +18,18 @@ mod part1 {
         assert_eq!(answer, 12);
     }
 }
+
+mod part2 {
+    use super::*;
+
+    #[test]
+    fn example1() {
+        let input = prepare(vec![
+            "abcde", "fghij", "klmno", "pqrst", "fguij", "axcye", "wvxyz",
+        ]);
+
+        let answer = search_prototype_boxes(&input);
+
+        assert_eq!(answer, "fgij");
+    }
+}
