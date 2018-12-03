@@ -14,5 +14,5 @@ keywords = ["advent", "puzzle"]
 bench = false
 
 [dependencies]
-aoc-runner = "0.1"
-aoc-runner-derive = "0.1"
+aoc-runner = "0.2.0-alpha1"
+aoc-runner-derive = "0.2.0-alpha1"
