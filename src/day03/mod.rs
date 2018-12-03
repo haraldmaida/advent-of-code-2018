@@ -1,5 +1,7 @@
 //! # Day 3: No Matter How You Slice It
 //!
+//! ## Part 1
+//!
 //! The Elves managed to locate the chimney-squeeze prototype fabric for Santa's
 //! suit (thanks to someone who helpfully wrote its box IDs on the wall of the
 //! warehouse in the middle of the night). Unfortunately, anomalies are still
@@ -66,15 +68,30 @@
 //! If the Elves all proceed with their own plans, none of them will have enough
 //! fabric. How many square inches of fabric are within two or more claims?
 //!
+//! ## Part 2
+//!
+//! Amidst the chaos, you notice that exactly one claim doesn't overlap by even
+//! a single square inch of fabric with any other claim. If you can somehow draw
+//! attention to it, maybe the Elves will be able to make Santa's suit after
+//! all!
+//!
+//! For example, in the claims above, only claim 3 is intact after all claims
+//! are made.
+//!
+//! What is the ID of the only claim that doesn't overlap?
+//!
 //! [Advent of Code 2018 - Day 3](https://adventofcode.com/2018/day/3)
 
 use std::collections::HashSet;
+use std::iter::FromIterator;
 use std::num::ParseIntError;
 use std::str::FromStr;
 
+pub type ClaimId = u32;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Claim {
-    id: u32,
+    id: ClaimId,
     left: u16,
     top: u16,
     width: u16,
@@ -219,6 +236,38 @@ pub fn overlapping_area(input: &[Claim]) -> usize {
     }
 
     overlapping_pieces.len()
+}
+
+#[aoc(day3, part2)]
+pub fn non_overlapping_claims(input: &[Claim]) -> ClaimId {
+    let mut non_overlapping_claims: HashSet<ClaimId> =
+        HashSet::from_iter(input.iter().map(|claim| claim.id));
+
+    for (idx, claim1) in input.iter().enumerate() {
+        let a1 = claim1.left;
+        let b1 = claim1.left + claim1.width - 1;
+        let c1 = claim1.top;
+        let d1 = claim1.top + claim1.height - 1;
+
+        for claim2 in input.iter().skip(idx + 1) {
+            let a2 = claim2.left;
+            let b2 = claim2.left + claim2.width - 1;
+            let c2 = claim2.top;
+            let d2 = claim2.top + claim2.height - 1;
+
+            if ((a2 >= a1 && a2 <= b1) && ((c2 >= c1 && c2 <= d1) || (c2 <= c1 && d2 >= c1)))
+                || ((a2 <= a1 && b2 >= a1) && ((c2 >= c1 && c2 <= d1) || (c2 <= c1 && d2 >= c1)))
+            {
+                non_overlapping_claims.remove(&claim1.id);
+                non_overlapping_claims.remove(&claim2.id);
+            }
+        }
+    }
+
+    non_overlapping_claims
+        .into_iter()
+        .next()
+        .expect("no non overlapping claim found")
 }
 
 #[cfg(test)]
