@@ -85,7 +85,7 @@ pub fn parse(input: &str) -> Vec<String> {
 
 #[aoc(day2, part1)]
 pub fn checksum(box_ids: &[String]) -> u32 {
-    let (sum_of_twos, sum_of_threes) = box_ids.iter().fold((0, 0), |(twos, threes), id| {
+    let (twos_count, threes_count) = box_ids.iter().fold((0, 0), |(twos, threes), id| {
         let mut letter_counts = HashMap::with_capacity(32);
 
         for letter in id.chars() {
@@ -110,7 +110,7 @@ pub fn checksum(box_ids: &[String]) -> u32 {
         (twos, threes)
     });
 
-    sum_of_twos * sum_of_threes
+    twos_count * threes_count
 }
 
 #[aoc(day2, part2)]
