@@ -38,12 +38,7 @@ fn parse_wakes_up() {
     )
 }
 
-mod part1 {
-    use super::*;
-
-    #[test]
-    fn example1() {
-        let input = "[1518-11-01 00:00] Guard #10 begins shift
+const EXAMPLE1_INPUT: &str = "[1518-11-01 00:00] Guard #10 begins shift
 [1518-11-01 00:05] falls asleep
 [1518-11-01 00:25] wakes up
 [1518-11-01 00:30] falls asleep
@@ -61,8 +56,28 @@ mod part1 {
 [1518-11-05 00:45] falls asleep
 [1518-11-05 00:55] wakes up";
 
+mod part1 {
+    use super::*;
+
+    #[test]
+    fn example1() {
+        let input = EXAMPLE1_INPUT;
+
         let answer = most_asleep_minute(&parse(input));
 
         assert_eq!(answer, (10, 24));
+    }
+}
+
+mod part2 {
+    use super::*;
+
+    #[test]
+    fn example1() {
+        let input = EXAMPLE1_INPUT;
+
+        let answer = most_frequently_asleep_minute(&parse(input));
+
+        assert_eq!(answer, (99, 45, 3));
     }
 }

@@ -88,6 +88,18 @@
 //! What is the ID of the guard you chose multiplied by the minute you chose?
 //! <br/>(In the above example, the answer would be 10 * 24 = 240.)
 //!
+//! ## Part 2
+//!
+//! **Strategy 2:** Of all guards, which guard is most frequently asleep on the
+//! same minute?
+//!
+//! In the example above, Guard #99 spent minute 45 asleep more than any other
+//! guard or minute - three times in total. (In all other cases, any guard spent
+//! any minute asleep at most twice.)
+//!
+//! What is the ID of the guard you chose multiplied by the minute you chose?
+//! (In the above example, the answer would be 99 * 45 = 4455.)
+//!
 //! [Advent of Code 2018 - Day 4](https://adventofcode.com/2018/day/4)
 
 use std::collections::HashMap;
@@ -170,9 +182,8 @@ pub fn strategy1(input: &[Record]) -> u32 {
     u32::from(guard_id) * minute
 }
 
-pub fn most_asleep_minute(input: &[Record]) -> (GuardId, u32) {
+fn sleeping_periods(input: &[Record]) -> HashMap<GuardId, Vec<(u8, u8)>> {
     let mut sleeping_periods: HashMap<GuardId, Vec<(u8, u8)>> = HashMap::with_capacity(16);
-    let mut time_sleeping: HashMap<GuardId, u32> = HashMap::with_capacity(16);
     let mut fall_asleep_time = 0;
     for record in input {
         match record.event {
@@ -183,23 +194,32 @@ pub fn most_asleep_minute(input: &[Record]) -> (GuardId, u32) {
                     .entry(record.guard_id)
                     .and_modify(|times| times.push(sleep_period))
                     .or_insert_with(|| vec![sleep_period]);
-                let sleep_time = u32::from(record.minute - fall_asleep_time);
-                time_sleeping
-                    .entry(record.guard_id)
-                    .and_modify(|minutes| *minutes += sleep_time)
-                    .or_insert(sleep_time);
             }
         }
     }
+    sleeping_periods
+}
 
-    let most_sleepy_guard = time_sleeping
-        .into_iter()
-        .max_by_key(|(_, value)| *value)
+fn most_asleep_minute(input: &[Record]) -> (GuardId, u32) {
+    let sleeping_periods = sleeping_periods(input);
+
+    let most_sleepy_guard = sleeping_periods
+        .iter()
+        .map(|(guard_id, periods)| {
+            (
+                guard_id,
+                periods
+                    .iter()
+                    .map(|(from, till)| u32::from(*till - *from))
+                    .sum::<u32>(),
+            )
+        })
+        .max_by_key(|(_, total)| *total)
         .map(|(guard_id, _)| guard_id)
         .expect(&format!("what? no guard sleeps actually?"));
 
     let mut sleepy_minutes = HashMap::with_capacity(32);
-    for (sleeps_from, sleeps_until) in sleeping_periods[&most_sleepy_guard].iter() {
+    for (sleeps_from, sleeps_until) in sleeping_periods[most_sleepy_guard].iter() {
         for minute in *sleeps_from..*sleeps_until {
             sleepy_minutes
                 .entry(minute)
@@ -214,7 +234,48 @@ pub fn most_asleep_minute(input: &[Record]) -> (GuardId, u32) {
         .map(|(minute, _)| minute)
         .expect("it was promised that the input reduces to exactly one minute");
 
-    (most_sleepy_guard, u32::from(ovl_minute))
+    (*most_sleepy_guard, u32::from(ovl_minute))
+}
+
+#[aoc(day4, part2)]
+pub fn strategy2(input: &[Record]) -> u32 {
+    let (guard_id, minute, _) = most_frequently_asleep_minute(input);
+    u32::from(guard_id) * u32::from(minute)
+}
+
+fn most_frequently_asleep_minute(input: &[Record]) -> (GuardId, u8, u32) {
+    let sleeping_periods = sleeping_periods(input);
+
+    let mut sleepy_minutes: HashMap<GuardId, HashMap<u8, u32>> = HashMap::with_capacity(16);
+    sleeping_periods
+        .into_iter()
+        .for_each(|(guard_id, sleepy_periods)| {
+            let guard_minutes = sleepy_minutes
+                .entry(guard_id)
+                .or_insert(HashMap::with_capacity(32));
+            sleepy_periods.into_iter().for_each(|(from, till)| {
+                (from..till).for_each(|minute| {
+                    guard_minutes
+                        .entry(minute)
+                        .and_modify(|count| *count += 1)
+                        .or_insert(1);
+                });
+            });
+        });
+
+    let (guard_id, (minute, count)) = sleepy_minutes
+        .into_iter()
+        .map(|(guard_id, guard_minutes)| {
+            let max_count_minute = guard_minutes
+                .into_iter()
+                .max_by_key(|(_, count)| *count)
+                .unwrap();
+            (guard_id, max_count_minute)
+        })
+        .max_by_key(|(_, (_, count))| *count)
+        .unwrap();
+
+    (guard_id, minute, count)
 }
 
 #[cfg(test)]
