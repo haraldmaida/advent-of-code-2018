@@ -1,5 +1,7 @@
 use super::*;
 
+const INPUT: &str = include_str!("../../input/2018/day1.txt");
+
 #[test]
 fn parse_input() {
     let input = "1\n -2\n3 \n1";
@@ -46,6 +48,13 @@ mod part1 {
         let answer = accumulate(&input);
 
         assert_eq!(answer, -6);
+    }
+
+    #[test]
+    fn answer() {
+        let answer = accumulate(&parse(INPUT));
+
+        assert_eq!(answer, 445);
     }
 }
 
@@ -95,5 +104,12 @@ mod part2 {
         let answer = calibrate(&input);
 
         assert_eq!(answer, 14);
+    }
+
+    #[test]
+    fn answer() {
+        let answer = calibrate(&parse(INPUT));
+
+        assert_eq!(answer, 219);
     }
 }

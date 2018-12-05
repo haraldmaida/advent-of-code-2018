@@ -1,5 +1,7 @@
 use super::*;
 
+const INPUT: &str = include_str!("../../input/2018/day3.txt");
+
 mod part1 {
     use super::*;
 
@@ -31,7 +33,7 @@ mod part1 {
 
         let answer = overlapping_area(&input);
 
-        assert_eq!(answer, 4)
+        assert_eq!(answer, 4);
     }
 
     #[test]
@@ -62,7 +64,14 @@ mod part1 {
 
         let answer = overlapping_area(&input);
 
-        assert_eq!(answer, 16)
+        assert_eq!(answer, 16);
+    }
+
+    #[test]
+    fn answer() {
+        let answer = overlapping_area(&parse(INPUT));
+
+        assert_eq!(answer, 119572);
     }
 }
 
@@ -97,6 +106,13 @@ mod part2 {
 
         let answer = non_overlapping_claims(&input);
 
-        assert_eq!(answer, 3)
+        assert_eq!(answer, 3);
+    }
+
+    #[test]
+    fn answer() {
+        let answer = non_overlapping_claims(&parse(INPUT));
+
+        assert_eq!(answer, 775);
     }
 }

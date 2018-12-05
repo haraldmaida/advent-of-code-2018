@@ -1,5 +1,7 @@
 use super::*;
 
+const INPUT: &str = include_str!("../../input/2018/day2.txt");
+
 fn prepare(input: Vec<&str>) -> Vec<String> {
     input.into_iter().map(ToOwned::to_owned).collect()
 }
@@ -17,6 +19,13 @@ mod part1 {
 
         assert_eq!(answer, 12);
     }
+
+    #[test]
+    fn answer() {
+        let answer = checksum(&parse(INPUT));
+
+        assert_eq!(answer, 5681);
+    }
 }
 
 mod part2 {
@@ -31,5 +40,12 @@ mod part2 {
         let answer = search_prototype_boxes(&input);
 
         assert_eq!(answer, "fgij");
+    }
+
+    #[test]
+    fn answer() {
+        let answer = search_prototype_boxes(&parse(INPUT));
+
+        assert_eq!(answer, "uqyoeizfvmbistpkgnocjtwld");
     }
 }

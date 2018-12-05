@@ -1,5 +1,7 @@
 use super::*;
 
+const INPUT: &str = include_str!("../../input/2018/day4.txt");
+
 #[test]
 fn parse_falls_asleep() {
     let input = "[1518-05-19 23:51] Guard #577 begins shift\n[1518-05-20 00:03] falls asleep";
@@ -67,6 +69,13 @@ mod part1 {
 
         assert_eq!(answer, (10, 24));
     }
+
+    #[test]
+    fn answer() {
+        let answer = strategy1(&parse(INPUT));
+
+        assert_eq!(answer, 14346);
+    }
 }
 
 mod part2 {
@@ -79,5 +88,12 @@ mod part2 {
         let answer = most_frequently_asleep_minute(&parse(input));
 
         assert_eq!(answer, (99, 45, 3));
+    }
+
+    #[test]
+    fn answer() {
+        let answer = strategy2(&parse(INPUT));
+
+        assert_eq!(answer, 5705);
     }
 }
