@@ -68,6 +68,9 @@
 //!
 //! [Advent of Code 2018 - Day 5](https://adventofcode.com/2018/day/5)
 
+use std::collections::{HashMap, HashSet};
+use std::iter::FromIterator;
+
 #[aoc(day5, part1)]
 pub fn reduced_polymer_len(input: &str) -> usize {
     reduce_polymer(input.trim()).len()
@@ -109,6 +112,35 @@ fn reduce_polymer(input: &str) -> String {
         polymer_length = reduced_length;
         polymer = reduced_polymer;
     }
+}
+
+#[aoc(day5, part2)]
+pub fn improved_polymer_len(input: &str) -> usize {
+    let (_, best_polymer) = improve_polymer(input.trim());
+    best_polymer.len()
+}
+
+fn improve_polymer(input: &str) -> (char, String) {
+    let mut unit_types = HashSet::with_capacity(26);
+    input.chars().for_each(|c| {
+        unit_types.insert(c.to_ascii_lowercase());
+    });
+
+    let mut improved_polymers = HashMap::with_capacity(unit_types.len());
+    for unit_type in unit_types {
+        let mut polymer = String::from_iter(
+            input
+                .chars()
+                .filter(|c| unit_type != c.to_ascii_lowercase()),
+        );
+        let reduced_polymer = reduce_polymer(&polymer);
+        improved_polymers.insert(unit_type, reduced_polymer);
+    }
+
+    improved_polymers
+        .into_iter()
+        .min_by_key(|(_, polymer)| polymer.len())
+        .expect("no best polymer found")
 }
 
 #[cfg(test)]

@@ -72,6 +72,26 @@ mod part1 {
     fn answer() {
         let answer = reduced_polymer_len(INPUT);
 
-        assert_eq!(answer, 9348)
+        assert_eq!(answer, 9348);
+    }
+}
+
+mod part2 {
+    use super::*;
+
+    #[test]
+    fn example1() {
+        let input = "dabAcCaCBAcCcaDA";
+
+        let answer = improve_polymer(input);
+
+        assert_eq!(answer, ('c', "daDA".into()));
+    }
+
+    #[test]
+    fn answer() {
+        let answer = improved_polymer_len(INPUT);
+
+        assert_eq!(answer, 4996)
     }
 }
