@@ -75,10 +75,59 @@
 //!
 //! What is the size of the largest area that isn't infinite?
 //!
+//! ## Part 2
+//!
+//! On the other hand, if the coordinates are safe, maybe the best you can do is
+//! try to find a region near as many coordinates as possible.
+//!
+//! For example, suppose you want the sum of the Manhattan distance to all of
+//! the coordinates to be less than 32. For each location, add up the distances
+//! to all of the given coordinates; if the total of those distances is less
+//! than 32, that location is within the desired region. Using the same
+//! coordinates as above, the resulting region looks like this:
+//!
+//! ```text
+//! ..........
+//! .A........
+//! ..........
+//! ...###..C.
+//! ..#D###...
+//! ..###E#...
+//! .B.###....
+//! ..........
+//! ..........
+//! ........F.
+//! ```
+//!
+//! In particular, consider the highlighted location 4,3 located at the top
+//! middle of the region. Its calculation is as follows, where abs() is the
+//! absolute value function:
+//!
+//! * Distance to coordinate A: abs(4-1) + abs(3-1) =  5
+//! * Distance to coordinate B: abs(4-1) + abs(3-6) =  6
+//! * Distance to coordinate C: abs(4-8) + abs(3-3) =  4
+//! * Distance to coordinate D: abs(4-3) + abs(3-4) =  2
+//! * Distance to coordinate E: abs(4-5) + abs(3-5) =  3
+//! * Distance to coordinate F: abs(4-8) + abs(3-9) = 10
+//! * Total distance: 5 + 6 + 4 + 2 + 3 + 10 = 30
+//!
+//! Because the total distance to all coordinates (30) is less than 32, the
+//! location is within the region.
+//!
+//! This region, which also includes coordinates D and E, has a total size of
+//! 16.
+//!
+//! Your actual region will need to be much larger than this example, though,
+//! instead including all locations with a total distance of less than 10000.
+//!
+//! What is the size of the region containing all locations which have a total
+//! distance to all given coordinates of less than 10000?
+//!
 //! [Advent of Code 2018 - Day 6](https://adventofcode.com/2018/day/6)
 
 use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Display};
+use std::iter::Sum;
 use std::str::FromStr;
 
 #[aoc_generator(day6)]
@@ -115,6 +164,11 @@ impl Point {
 
     pub fn y(&self) -> i32 {
         self.y
+    }
+
+    /// Manhattan distance from this point to another point.
+    fn distance(&self, other: &Point) -> Distance {
+        Distance((other.x - self.x).abs() as u32 + (other.y - self.y).abs() as u32)
     }
 }
 
@@ -154,7 +208,7 @@ impl FromStr for Point {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Distance(u32);
+pub struct Distance(pub u32);
 
 impl Display for Distance {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -162,10 +216,12 @@ impl Display for Distance {
     }
 }
 
-impl Point {
-    /// Manhattan distance from this point to another point.
-    fn distance(&self, other: &Point) -> Distance {
-        Distance((other.x - self.x).abs() as u32 + (other.y - self.y).abs() as u32)
+impl Sum for Distance {
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = Self>,
+    {
+        Distance(iter.fold(0, |acc, a| acc + a.0))
     }
 }
 
@@ -176,30 +232,11 @@ pub fn solve_part1(input: &[Point]) -> u32 {
 }
 
 pub fn largest_area(points: &[Point]) -> (Point, u32) {
-    let min_x = points
-        .iter()
-        .map(Point::x)
-        .min()
-        .expect("no point in the list");
-    let min_y = points
-        .iter()
-        .map(Point::y)
-        .min()
-        .expect("no point in the list");
-    let max_x = points
-        .iter()
-        .map(Point::x)
-        .max()
-        .expect("no point in the list");
-    let max_y = points
-        .iter()
-        .map(Point::y)
-        .max()
-        .expect("no point in the list");
+    let (top_left, bottom_right) = viewport(points);
 
     let mut point_map: HashMap<Point, Point> = HashMap::with_capacity(32);
-    for x in min_x..=max_x {
-        for y in min_y..=max_y {
+    for x in top_left.x..=bottom_right.x {
+        for y in top_left.y..=bottom_right.y {
             let coord = Point { x, y };
             let mut distance_map: HashMap<Point, Distance> = HashMap::with_capacity(32);
             for point in points {
@@ -256,10 +293,53 @@ pub fn largest_area(points: &[Point]) -> (Point, u32) {
         .expect("no point in list")
 }
 
-//#[aoc(day6, part2)]
-//pub fn part2(input: &[Point]) -> u32 {
-//    unimplemented!()
-//}
+fn viewport(points: &[Point]) -> (Point, Point) {
+    let min_x = points
+        .iter()
+        .map(Point::x)
+        .min()
+        .expect("no point in the list");
+    let min_y = points
+        .iter()
+        .map(Point::y)
+        .min()
+        .expect("no point in the list");
+    let max_x = points
+        .iter()
+        .map(Point::x)
+        .max()
+        .expect("no point in the list");
+    let max_y = points
+        .iter()
+        .map(Point::y)
+        .max()
+        .expect("no point in the list");
+    (Point { x: min_x, y: min_y }, Point { x: max_x, y: max_y })
+}
+
+#[aoc(day6, part2)]
+pub fn solve_part2(input: &[Point]) -> u32 {
+    area_within_distance(Distance(10_000), input)
+}
+
+pub fn area_within_distance(target_distance: Distance, points: &[Point]) -> u32 {
+    points_within_distance(target_distance, points).len() as u32
+}
+
+fn points_within_distance(target_distance: Distance, points: &[Point]) -> HashSet<Point> {
+    let mut distance_map: HashMap<Point, Distance> = HashMap::with_capacity(32);
+    let (top_left, bottom_right) = viewport(points);
+    for x in top_left.x..=bottom_right.x {
+        for y in top_left.y..=bottom_right.y {
+            let coord = Point { x, y };
+            let total_distance = points.iter().map(|point| coord.distance(point)).sum();
+            if total_distance < target_distance {
+                distance_map.insert(coord, total_distance);
+            }
+        }
+    }
+    distance_map.keys().map(ToOwned::to_owned).collect()
+}
 
 #[cfg(test)]
 mod tests;
