@@ -68,8 +68,10 @@
 //!
 //! [Advent of Code 2018 - Day 5](https://adventofcode.com/2018/day/5)
 
-use std::collections::{HashMap, HashSet};
-use std::iter::FromIterator;
+use std::{
+    collections::{HashMap, HashSet},
+    iter::FromIterator,
+};
 
 #[aoc(day5, part1)]
 pub fn reduced_polymer_len(input: &str) -> usize {

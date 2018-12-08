@@ -118,10 +118,12 @@
 //!
 //! [Advent of Code 2018 - Day 7](https://adventofcode.com/2018/day/7)
 
-use std::collections::{HashMap, HashSet};
-use std::fmt::{self, Display};
-use std::iter::{FromIterator, IntoIterator};
-use std::ops::{Add, AddAssign, Sub, SubAssign};
+use std::{
+    collections::{HashMap, HashSet},
+    fmt::{self, Display},
+    iter::{FromIterator, IntoIterator},
+    ops::{Add, AddAssign, Sub, SubAssign},
+};
 
 pub type InstructionId = char;
 

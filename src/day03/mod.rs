@@ -82,10 +82,12 @@
 //!
 //! [Advent of Code 2018 - Day 3](https://adventofcode.com/2018/day/3)
 
-use std::collections::HashSet;
-use std::iter::FromIterator;
-use std::num::ParseIntError;
-use std::str::FromStr;
+use std::{
+    collections::HashSet,
+    iter::FromIterator,
+    num::ParseIntError,
+    str::FromStr,
+};
 
 pub type ClaimId = u32;
 

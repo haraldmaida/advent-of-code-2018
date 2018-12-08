@@ -102,8 +102,7 @@
 //!
 //! [Advent of Code 2018 - Day 4](https://adventofcode.com/2018/day/4)
 
-use std::collections::HashMap;
-use std::u8;
+use std::{collections::HashMap, u8};
 
 pub type GuardId = u16;
 

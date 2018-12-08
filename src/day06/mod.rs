@@ -125,10 +125,12 @@
 //!
 //! [Advent of Code 2018 - Day 6](https://adventofcode.com/2018/day/6)
 
-use std::collections::{HashMap, HashSet};
-use std::fmt::{self, Display};
-use std::iter::Sum;
-use std::str::FromStr;
+use std::{
+    collections::{HashMap, HashSet},
+    fmt::{self, Display},
+    iter::Sum,
+    str::FromStr,
+};
 
 #[aoc_generator(day6)]
 pub fn parse(input: &str) -> Vec<Point> {

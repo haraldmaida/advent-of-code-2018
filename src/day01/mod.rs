@@ -62,8 +62,7 @@
 //!
 //! [Advent of Code 2018 - Day 1](https://adventofcode.com/2018/day/1)
 
-use std::collections::HashSet;
-use std::str::FromStr;
+use std::{collections::HashSet, str::FromStr};
 
 pub type Frequency = i32;
 
