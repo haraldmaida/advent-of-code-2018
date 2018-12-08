@@ -15,16 +15,16 @@ mod parse_input {
             license,
             License::new(
                 vec![
-                    Node::new(0, 0),
                     Node::new(0, 1),
-                    Node::new(0, 2),
-                    Node::new(2, 3),
+                    Node::new(1, 2),
+                    Node::new(1, 3),
+                    Node::new(3, 4),
                 ],
                 vec![
-                    (NodeId(0), vec![Metadata(1), Metadata(1), Metadata(2)]),
-                    (NodeId(1), vec![Metadata(10), Metadata(11), Metadata(12)]),
-                    (NodeId(2), vec![Metadata(2)]),
-                    (NodeId(3), vec![Metadata(99)]),
+                    (NodeId(1), vec![Metadata(1), Metadata(1), Metadata(2)]),
+                    (NodeId(2), vec![Metadata(10), Metadata(11), Metadata(12)]),
+                    (NodeId(3), vec![Metadata(2)]),
+                    (NodeId(4), vec![Metadata(99)]),
                 ]
             )
         );
@@ -47,8 +47,53 @@ mod part1 {
     fn answer() {
         let license = parse(INPUT);
 
-        let answer = license.metadata_checksum();
+        let answer = metadata_checksum(&license);
 
         assert_eq!(answer, 40746);
+    }
+}
+
+mod part2 {
+    use super::*;
+
+    #[test]
+    fn example1() {
+        let license = parse(EXAMPLE1_INPUT);
+
+        let answer = license.value(ROOT.id);
+
+        assert_eq!(answer, 66);
+    }
+
+    #[test]
+    fn answer() {
+        let license = parse(INPUT);
+
+        let answer = value_of_license_root(&license);
+
+        assert_eq!(answer, 37453);
+    }
+}
+
+mod license {
+    use super::*;
+
+    #[test]
+    fn child_nodes_of_root() {
+        let license = parse(EXAMPLE1_INPUT);
+
+        let child_nodes = license.child_nodes(ROOT.id);
+
+        assert!(child_nodes.contains(&Node::new(1, 2)));
+        assert!(child_nodes.contains(&Node::new(1, 3)));
+    }
+
+    #[test]
+    fn child_nodes_of_node1() {
+        let license = parse(EXAMPLE1_INPUT);
+
+        let child_nodes = license.child_nodes(NodeId(2));
+
+        assert!(child_nodes.is_empty());
     }
 }
