@@ -88,23 +88,20 @@ fn reduce_polymer(input: &str) -> String {
             .for_each(|(char1, char2)| {
                 if skip_next {
                     skip_next = false;
+                } else if char1 != char2 && char1.to_ascii_lowercase() == char2.to_ascii_lowercase()
+                {
+                    skip_next = true;
                 } else {
-                    if char1 != char2 && char1.to_ascii_lowercase() == char2.to_ascii_lowercase() {
-                        skip_next = true;
-                    } else {
-                        reduced_polymer.push(char1);
-                    }
+                    reduced_polymer.push(char1);
                 }
             });
 
         let mut reduced_length = reduced_polymer.len();
         if skip_next {
             skip_next = false;
-        } else {
-            if ((polymer_length - reduced_length) & 1) == 1 {
-                reduced_polymer.push(polymer.chars().last().unwrap());
-                reduced_length += 1;
-            }
+        } else if ((polymer_length - reduced_length) & 1) == 1 {
+            reduced_polymer.push(polymer.chars().last().unwrap());
+            reduced_length += 1;
         }
         if reduced_length == polymer_length {
             return reduced_polymer;
@@ -128,7 +125,7 @@ fn improve_polymer(input: &str) -> (char, String) {
 
     let mut improved_polymers = HashMap::with_capacity(unit_types.len());
     for unit_type in unit_types {
-        let mut polymer = String::from_iter(
+        let polymer = String::from_iter(
             input
                 .chars()
                 .filter(|c| unit_type != c.to_ascii_lowercase()),

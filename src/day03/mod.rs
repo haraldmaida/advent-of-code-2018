@@ -124,7 +124,7 @@ impl FromStr for Claim {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut input = s.chars();
+        let input = s.chars();
 
         let mut token = Token::Unknown;
         let mut id = String::new();
@@ -133,7 +133,7 @@ impl FromStr for Claim {
         let mut width = String::new();
         let mut height = String::new();
 
-        while let Some(char) = input.next() {
+        for char in input {
             match char {
                 '#' => token = Token::Id,
                 '@' => token = Token::Left,
@@ -151,14 +151,14 @@ impl FromStr for Claim {
                         return Err(ParseError::UnknownToken(format!(
                             "unexpected character {} while parsing {:?}",
                             char, token
-                        )))
+                        )));
                     }
                 },
                 _ => {
                     return Err(ParseError::UnknownToken(format!(
                         "unexpected character {} in {}",
                         char, s
-                    )))
+                    )));
                 }
             }
         }

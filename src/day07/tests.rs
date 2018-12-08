@@ -50,7 +50,9 @@ mod part1 {
 
     #[test]
     fn example1() {
-        let answer = execution_order(&parse(EXAMPLE1_INPUT));
+        let execution_plan = parse(EXAMPLE1_INPUT);
+
+        let answer = String::from_iter(execution_plan.in_order());
 
         assert_eq!(answer, "CABDFE");
     }
@@ -65,4 +67,21 @@ mod part1 {
 
 mod part2 {
     use super::*;
+
+    #[test]
+    fn example1() {
+        let instruction_set = InstructionSet::new(Duration::from_sec(0));
+        let execution_plan = parse(EXAMPLE1_INPUT);
+
+        let answer = execution_plan.execution_time(2, instruction_set);
+
+        assert_eq!(answer, Duration::from_sec(15));
+    }
+
+    #[test]
+    fn answer() {
+        let answer = execution_time(&parse(INPUT));
+
+        assert_eq!(answer, Duration::from_sec(959));
+    }
 }

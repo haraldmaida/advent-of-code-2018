@@ -136,16 +136,18 @@ pub fn parse(input: &str) -> Vec<Record> {
                     .filter(|c| c.is_digit(10))
                     .collect::<String>()
                     .parse()
-                    .expect(&format!("not a guard id in line {}", line))
+                    .unwrap_or_else(|_| {
+                        panic!("not a guard id in line {}", line);
+                    })
             }
             "falls" => {
                 let day = line[1..11].to_owned();
-                let hour = line[12..14]
-                    .parse()
-                    .expect(&format!("not an hour in line {}", line));
-                let minute = line[15..17]
-                    .parse()
-                    .expect(&format!("not an minute in line {}", line));
+                let hour = line[12..14].parse().unwrap_or_else(|_| {
+                    panic!("not an hour in line {}", line);
+                });
+                let minute = line[15..17].parse().unwrap_or_else(|_| {
+                    panic!("not an minute in line {}", line);
+                });
                 records.push(Record {
                     guard_id,
                     day,
@@ -158,10 +160,10 @@ pub fn parse(input: &str) -> Vec<Record> {
                 let day = line[1..11].to_owned();
                 let hour = line[12..14]
                     .parse()
-                    .expect(&format!("not an hour in line {}", line));
+                    .unwrap_or_else(|_| panic!("not an hour in line {}", line));
                 let minute = line[15..17]
                     .parse()
-                    .expect(&format!("not an minute in line {}", line));
+                    .unwrap_or_else(|_| panic!("not an minute in line {}", line));
                 records.push(Record {
                     guard_id,
                     day,
@@ -216,7 +218,7 @@ fn most_asleep_minute(input: &[Record]) -> (GuardId, u32) {
         })
         .max_by_key(|(_, total)| *total)
         .map(|(guard_id, _)| guard_id)
-        .expect(&format!("what? no guard sleeps actually?"));
+        .unwrap_or_else(|| panic!("what? no guard sleeps actually?"));
 
     let mut sleepy_minutes = HashMap::with_capacity(32);
     for (sleeps_from, sleeps_until) in sleeping_periods[most_sleepy_guard].iter() {
@@ -252,7 +254,7 @@ fn most_frequently_asleep_minute(input: &[Record]) -> (GuardId, u8, u32) {
         .for_each(|(guard_id, sleepy_periods)| {
             let guard_minutes = sleepy_minutes
                 .entry(guard_id)
-                .or_insert(HashMap::with_capacity(32));
+                .or_insert_with(|| HashMap::with_capacity(32));
             sleepy_periods.into_iter().for_each(|(from, till)| {
                 (from..till).for_each(|minute| {
                     guard_minutes

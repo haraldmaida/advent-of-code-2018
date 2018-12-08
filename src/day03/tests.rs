@@ -71,7 +71,7 @@ mod part1 {
     fn answer() {
         let answer = overlapping_area(&parse(INPUT));
 
-        assert_eq!(answer, 119572);
+        assert_eq!(answer, 119_572);
     }
 }
 

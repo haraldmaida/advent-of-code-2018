@@ -129,7 +129,7 @@ pub fn search_prototype_boxes(box_ids: &[String]) -> String {
             }
         }
     }
-    found_id.unwrap_or_else(|| format!("no correct box id found"))
+    found_id.unwrap_or_else(|| "no correct box id found".to_owned())
 }
 
 #[cfg(test)]

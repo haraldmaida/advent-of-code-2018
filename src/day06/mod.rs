@@ -137,7 +137,7 @@ pub fn parse(input: &str) -> Vec<Point> {
         .lines()
         .map(|line| {
             line.parse()
-                .expect(&format!("can not parse Point in line: {:?}", line))
+                .unwrap_or_else(|_| panic!("can not parse Point in line: {:?}", line))
         })
         .collect()
 }
@@ -158,16 +158,16 @@ impl From<(i32, i32)> for Point {
 }
 
 impl Point {
-    pub fn x(&self) -> i32 {
+    pub fn x(self) -> i32 {
         self.x
     }
 
-    pub fn y(&self) -> i32 {
+    pub fn y(self) -> i32 {
         self.y
     }
 
     /// Manhattan distance from this point to another point.
-    fn distance(&self, other: &Point) -> Distance {
+    fn distance(self, other: Point) -> Distance {
         Distance((other.x - self.x).abs() as u32 + (other.y - self.y).abs() as u32)
     }
 }
@@ -188,7 +188,7 @@ impl FromStr for Point {
     type Err = ParsePointError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut coords = s.split(",");
+        let mut coords = s.split(',');
         let x = coords
             .next()
             .ok_or_else(|| ParsePointError::MissingXCoordinate(s.to_string()))?;
@@ -240,7 +240,7 @@ pub fn largest_area(points: &[Point]) -> (Point, u32) {
             let coord = Point { x, y };
             let mut distance_map: HashMap<Point, Distance> = HashMap::with_capacity(32);
             for point in points {
-                distance_map.insert(*point, point.distance(&coord));
+                distance_map.insert(*point, point.distance(coord));
             }
             let smallest_distance = distance_map
                 .iter()
@@ -296,22 +296,22 @@ pub fn largest_area(points: &[Point]) -> (Point, u32) {
 fn viewport(points: &[Point]) -> (Point, Point) {
     let min_x = points
         .iter()
-        .map(Point::x)
+        .map(|point| point.x)
         .min()
         .expect("no point in the list");
     let min_y = points
         .iter()
-        .map(Point::y)
+        .map(|point| point.y)
         .min()
         .expect("no point in the list");
     let max_x = points
         .iter()
-        .map(Point::x)
+        .map(|point| point.x)
         .max()
         .expect("no point in the list");
     let max_y = points
         .iter()
-        .map(Point::y)
+        .map(|point| point.y)
         .max()
         .expect("no point in the list");
     (Point { x: min_x, y: min_y }, Point { x: max_x, y: max_y })
@@ -332,7 +332,7 @@ fn points_within_distance(target_distance: Distance, points: &[Point]) -> HashSe
     for x in top_left.x..=bottom_right.x {
         for y in top_left.y..=bottom_right.y {
             let coord = Point { x, y };
-            let total_distance = points.iter().map(|point| coord.distance(point)).sum();
+            let total_distance = points.iter().map(|point| point.distance(coord)).sum();
             if total_distance < target_distance {
                 distance_map.insert(coord, total_distance);
             }

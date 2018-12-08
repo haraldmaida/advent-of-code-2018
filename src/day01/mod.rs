@@ -74,18 +74,20 @@ pub fn parse(input: &str) -> Vec<Frequency> {
         .filter(|s| !s.is_empty())
         .enumerate()
         .map(|(idx, text)| {
-            Frequency::from_str(text.trim()).expect(&format!(
-                "input text at line {:03} is not an i32 but is {:?}",
-                idx + 1,
-                text
-            ))
+            Frequency::from_str(text.trim()).unwrap_or_else(|_| {
+                panic!(
+                    "input text at line {:03} is not an i32 but is {:?}",
+                    idx + 1,
+                    text
+                )
+            })
         })
         .collect()
 }
 
 #[aoc(day1, part1)]
 pub fn accumulate(input: &[Frequency]) -> Frequency {
-    input.into_iter().sum()
+    input.iter().sum()
 }
 
 #[aoc(day1, part2)]
