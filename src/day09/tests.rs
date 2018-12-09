@@ -342,3 +342,17 @@ mod part1 {
         assert_eq!(answer, Score(439635));
     }
 }
+
+mod part2 {
+    use super::*;
+
+    #[ignore]
+    #[test]
+    fn answer() {
+        let game = parse(INPUT);
+
+        let answer = marble_highscore(&game);
+
+        assert_eq!(answer, Score(3562722971));
+    }
+}

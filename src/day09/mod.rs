@@ -79,6 +79,13 @@
 //!
 //! What is the winning Elf's score?
 //!
+//! ## Part 2
+//!
+//! Amused by the speed of your answer, the Elves are curious:
+//!
+//! What would the new winning Elf's score be if the number of the last marble
+//! were 100 times larger?
+//!
 //! [Advent of Code 2018 - Day 9](https://adventofcode.com/2018/day/9)
 
 use std::{
@@ -402,6 +409,18 @@ pub fn parse(input: &str) -> MarbleGame {
 
 #[aoc(day9, part1)]
 pub fn marble_highscore(marble_game: &MarbleGame) -> Score {
+    let runner = marble_game.runner();
+    runner
+        .finish()
+        .into_iter()
+        .map(|(_, score)| score)
+        .max()
+        .expect("there should be any score because it is initialized for all players")
+}
+
+#[aoc(day9, part2)]
+pub fn marble_highscore_100(marble_game: &MarbleGame) -> Score {
+    let marble_game = MarbleGame::new(marble_game.num_marbles * 10, marble_game.num_players);
     let runner = marble_game.runner();
     runner
         .finish()
