@@ -175,6 +175,15 @@
 //!
 //! What message will eventually appear in the sky?
 //!
+//! ## Part 2
+//!
+//! Good thing you didn't have to wait, because that would have taken a long
+//! time - much longer than the 3 seconds in the example above.
+//!
+//! Impressed by your sub-hour communication capabilities, the Elves are
+//! curious: exactly how many seconds would they have needed to wait for that
+//! message to appear?
+//!
 //! [Advent of Code 2018 - Day 10](https://adventofcode.com/2018/day/10)
 
 use std::{
@@ -193,6 +202,21 @@ pub struct Position {
 pub struct Velocity {
     pub x: i32,
     pub y: i32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Duration(u64);
+
+impl Display for Duration {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}s", self.0)
+    }
+}
+
+impl Duration {
+    pub fn increment(&mut self) {
+        self.0 += 1;
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -324,6 +348,25 @@ pub fn align_stars(sky: &Sky) -> Sky {
         }
     }
     last_sky
+}
+
+#[aoc(day10, part2)]
+pub fn time_to_aligned_stars(sky: &Sky) -> Duration {
+    let mut duration = Duration(0);
+    let mut last_area = i64::MAX;
+    let mut sky = sky.clone();
+    loop {
+        sky.evolve();
+        let (top_left, bottom_right) = sky.area();
+        let curr_area = (bottom_right.x - top_left.x) as i64 * (bottom_right.y - top_left.y) as i64;
+        if curr_area > last_area {
+            break;
+        } else {
+            last_area = curr_area;
+            duration.increment();
+        }
+    }
+    duration
 }
 
 #[cfg(test)]

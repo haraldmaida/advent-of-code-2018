@@ -79,3 +79,25 @@ mod part1 {
         assert_eq!(answer.to_string(), ANSWER);
     }
 }
+
+mod part2 {
+    use super::*;
+
+    #[test]
+    fn example1() {
+        let sky = parse(EXAMPLE_INPUT);
+
+        let answer = time_to_aligned_stars(&sky);
+
+        assert_eq!(answer, Duration(3));
+    }
+
+    #[test]
+    fn answer() {
+        let sky = parse(INPUT);
+
+        let answer = time_to_aligned_stars(&sky);
+
+        assert_eq!(answer, Duration(10355));
+    }
+}
