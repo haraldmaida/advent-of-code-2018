@@ -420,7 +420,7 @@ pub fn marble_highscore(marble_game: &MarbleGame) -> Score {
 
 #[aoc(day9, part2)]
 pub fn marble_highscore_100(marble_game: &MarbleGame) -> Score {
-    let marble_game = MarbleGame::new(marble_game.num_marbles * 10, marble_game.num_players);
+    let marble_game = MarbleGame::new(marble_game.num_marbles * 100, marble_game.num_players);
     let runner = marble_game.runner();
     runner
         .finish()
