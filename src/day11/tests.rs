@@ -82,6 +82,7 @@ mod part1 {
 mod part2 {
     use super::*;
 
+    #[ignore]
     #[test]
     fn example1() {
         let serial_no = SerialNo(18);
@@ -93,6 +94,7 @@ mod part2 {
         assert_eq!(power, PowerLevel(113));
     }
 
+    #[ignore]
     #[test]
     fn example2() {
         let serial_no = SerialNo(42);
@@ -104,6 +106,7 @@ mod part2 {
         assert_eq!(power, PowerLevel(119));
     }
 
+    #[ignore]
     #[test]
     fn answer() {
         let serial_no = parse(INPUT);

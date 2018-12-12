@@ -365,7 +365,7 @@ fn max_power_cell_group_size(serial_no: &SerialNo) -> (CellGroup, PowerLevel) {
                 .map(|group| (group, group.power_level(&power_grid)))
                 .max_by_key(|(_, level)| *level)
                 .unwrap();
-            eprintln!("{:?} = {}", group, power);
+            //eprintln!("{:?} = {}", group, power);
             (group, power)
         })
         .for_each(|result| max_per_group_size.push(result));
