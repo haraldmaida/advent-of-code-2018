@@ -50,6 +50,7 @@
 //! * Fuel cell at  122,79, grid serial number 57: power level -5.
 //! * Fuel cell at 217,196, grid serial number 39: power level  0.
 //! * Fuel cell at 101,153, grid serial number 71: power level  4.
+//!
 //! Your goal is to find the 3x3 square which has the largest total power. The
 //! square must be entirely within the 300x300 grid. Identify this square using
 //! the X,Y coordinate of its top-left fuel cell. For example:
@@ -80,6 +81,27 @@
 //! What is the X,Y coordinate of the top-left fuel cell of the 3x3 square with
 //! the largest total power?
 //!
+//! ## Part 2
+//!
+//! You discover a dial on the side of the device; it seems to let you select a
+//! square of any size, not just 3x3. Sizes from 1x1 to 300x300 are supported.
+//!
+//! Realizing this, you now must find the square of any size with the largest
+//! total power. Identify this square by including its size as a third parameter
+//! after the top-left coordinate: a 9x9 square with a top-left corner of 3,5 is
+//! identified as 3,5,9.
+//!
+//! For example:
+//!
+//! * For grid serial number 18, the largest total square (with a total power of
+//!   113) is 16x16 and has a top-left corner of 90,269, so its identifier is
+//!   90,269,16.
+//! * For grid serial number 42, the largest total square (with a total power of
+//!   119) is 12x12 and has a top-left corner of 232,251, so its identifier is
+//!   232,251,12.
+//!
+//! What is the X,Y,size identifier of the square with the largest total power?
+//!
 //! [Advent of Code 2018 - Day 11](https://adventofcode.com/2018/day/11)
 
 use std::{
@@ -107,7 +129,7 @@ impl FromStr for SerialNo {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct PowerLevel(pub i64);
+pub struct PowerLevel(pub i32);
 
 impl Display for PowerLevel {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -156,7 +178,7 @@ impl From<CellCoord> for RackId {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PowerGrid {
     serial_no: SerialNo,
     size: u32,
@@ -178,13 +200,11 @@ impl PowerGrid {
     pub fn cell_groups(&self, group_size: u32) -> Groups {
         Groups::new(self, group_size)
     }
+}
 
-    fn cell_power(&self, cell: CellCoord) -> PowerLevel {
-        let rack_id = i64::from(RackId::from(cell).0);
-        PowerLevel(
-            (rack_id * i64::from(cell.y) + i64::from(self.serial_no.0)) * rack_id % 1000 / 100 - 5,
-        )
-    }
+fn calc_cell_power(serial_no: SerialNo, cell: CellCoord) -> PowerLevel {
+    let rack_id = RackId::from(cell).0 as i32;
+    PowerLevel((rack_id * cell.y as i32 + serial_no.0 as i32) * rack_id % 1000 / 100 - 5)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -209,8 +229,8 @@ impl CellGroup {
     pub fn power_level(&self, grid: &PowerGrid) -> PowerLevel {
         self.cells()
             .map(|cell| {
-                let power = grid.cell_power(cell);
-                //eprintln!("{}: {:?}", cell, power);
+                let power = calc_cell_power(grid.serial_no, cell);
+                //eprintln!("{}: {}", cell, power);
                 power
             })
             .sum()
@@ -291,6 +311,21 @@ impl Iterator for Cells {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Answer(u32, u32, u32);
+
+impl Display for Answer {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{},{},{}", self.0, self.1, self.2)
+    }
+}
+
+impl From<(CellGroup, PowerLevel)> for Answer {
+    fn from((group, _): (CellGroup, PowerLevel)) -> Self {
+        Answer(group.coord.x, group.coord.y, group.size)
+    }
+}
+
 #[aoc_generator(day11)]
 pub fn parse(input: &str) -> SerialNo {
     input.trim().parse().unwrap()
@@ -302,15 +337,40 @@ pub fn best_cell_group(serial_no: &SerialNo) -> CellCoord {
     group.coord()
 }
 
-pub fn max_power_cell_group(serial_no: &SerialNo) -> (CellGroup, PowerLevel) {
+fn max_power_cell_group(serial_no: &SerialNo) -> (CellGroup, PowerLevel) {
     let power_grid = PowerGrid::new(*serial_no, 300);
     power_grid
         .cell_groups(3)
         .map(|group| {
             let power = group.power_level(&power_grid);
-            //eprintln!("{:?}: {:?}", group, power);
+            //eprintln!("{:?}: {}", group, power);
             (group, power)
         })
+        .max_by_key(|(_, level)| *level)
+        .unwrap()
+}
+
+#[aoc(day11, part2)]
+pub fn best_cell_group_size(serial_no: &SerialNo) -> Answer {
+    max_power_cell_group_size(serial_no).into()
+}
+
+fn max_power_cell_group_size(serial_no: &SerialNo) -> (CellGroup, PowerLevel) {
+    let power_grid = PowerGrid::new(*serial_no, 300);
+    let mut max_per_group_size = Vec::with_capacity(power_grid.size() as usize);
+    (1..=power_grid.size())
+        .map(|group_size| {
+            let (group, power) = power_grid
+                .cell_groups(group_size)
+                .map(|group| (group, group.power_level(&power_grid)))
+                .max_by_key(|(_, level)| *level)
+                .unwrap();
+            eprintln!("{:?} = {}", group, power);
+            (group, power)
+        })
+        .for_each(|result| max_per_group_size.push(result));
+    max_per_group_size
+        .into_iter()
         .max_by_key(|(_, level)| *level)
         .unwrap()
 }
