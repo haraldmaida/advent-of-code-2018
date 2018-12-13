@@ -1,7 +1,5 @@
 //! # Day 6:
 //!
-//! ## Part 1
-//!
 //! The device on your wrist beeps several times, and once again you feel like
 //! you're falling.
 //!

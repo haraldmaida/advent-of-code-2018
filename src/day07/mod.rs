@@ -1,7 +1,5 @@
 //! # Day 7: The Sum of Its Parts
 //!
-//! ## Part 1
-//!
 //! You find yourself standing on a snow-covered coastline; apparently, you
 //! landed a little off course. The region is too hilly to see the North Pole
 //! from here, but you do spot some Elves that seem to be trying to unpack

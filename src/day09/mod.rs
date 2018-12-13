@@ -1,7 +1,5 @@
 //! # Day 9: Marble Mania
 //!
-//! ## Part 1
-//!
 //! You talk to the Elves while you wait for your navigation system to
 //! initialize. To pass the time, they introduce you to their favorite marble
 //! game.

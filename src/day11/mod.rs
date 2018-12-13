@@ -1,7 +1,5 @@
 //! # Day 11: Chronal Charge
 //!
-//! ## Part 1
-//!
 //! You watch the Elves and their sleigh fade into the distance as they head
 //! toward the North Pole.
 //!
