@@ -108,6 +108,15 @@
 //! After 20 generations, what is the sum of the numbers of all pots which
 //! contain a plant?
 //!
+//! ## Part 2
+//!
+//! You realize that 20 generations aren't enough. After all, these plants will
+//! need to last another 1500 years to even reach your timeline, not to mention
+//! your future.
+//!
+//! After fifty billion (50000000000) generations, what is the sum of the
+//! numbers of all pots which contain a plant?
+//!
 //! [Advent of Code 2018 - Day 12](https://adventofcode.com/2018/day/12)
 
 use std::{
@@ -288,16 +297,20 @@ pub fn parse(input: &str) -> Plantation {
 }
 
 #[aoc(day12, part1)]
-pub fn sum_of_pot_numbers_after_20_generations(plantation: &Plantation) -> i32 {
+pub fn sum_of_pot_numbers_after_20_generations(plantation: &Plantation) -> i64 {
     let (evolved, offset) = evolve_n_generations(plantation, 20);
-    evolved
-        .plants()
+    sum_of_pot_numbers(&evolved, offset)
+}
+
+fn sum_of_pot_numbers(plantation: &Plantation, offset: i64) -> i64 {
+    let plants = plantation.plants();
+    plants
         .iter()
-        .zip(offset..evolved.plants().len() as i32 + offset)
+        .zip(offset..plants.len() as i64 + offset)
         .fold(0, |acc, (&pot, num)| if pot { acc + num } else { acc })
 }
 
-fn evolve_n_generations(plantation: &Plantation, num_generations: u32) -> (Plantation, i32) {
+fn evolve_n_generations(plantation: &Plantation, num_generations: u64) -> (Plantation, i64) {
     let breed_rules = plantation.breed_rules.clone();
     let pattern_size = breed_rules.0[0].pattern.len();
     let center = pattern_size / 2;
@@ -305,14 +318,16 @@ fn evolve_n_generations(plantation: &Plantation, num_generations: u32) -> (Plant
 
     let mut offset = 0;
     let mut plants = plantation.plants.clone();
-    for _ in 0..num_generations {
-        while &plants.0[plants.0.len() - pattern_size..] != outer {
-            plants.0.push(false);
-        }
-        while &plants.0[0..pattern_size] != outer {
-            plants.0.insert(0, false);
-            offset -= 1;
-        }
+
+    while &plants.0[plants.0.len() - pattern_size..] != outer {
+        plants.0.push(false);
+    }
+    while &plants.0[0..pattern_size] != outer {
+        plants.0.insert(0, false);
+        offset -= 1;
+    }
+
+    for gen_num in 0..num_generations {
         let mut next_plants = plants.clone();
 
         next_plants
@@ -334,7 +349,26 @@ fn evolve_n_generations(plantation: &Plantation, num_generations: u32) -> (Plant
                     .unwrap_or(false);
             });
 
+        let mut delta = 0;
+        while &next_plants.0[0..pattern_size] == outer {
+            next_plants.0.remove(0);
+            delta += 1;
+        }
+        while &next_plants.0[0..pattern_size] != outer {
+            next_plants.0.insert(0, false);
+            delta -= 1;
+        }
+        offset += delta;
+        while &next_plants.0[next_plants.0.len() - pattern_size..] != outer {
+            next_plants.0.push(false);
+        }
+
+        if next_plants == plants {
+            offset += (num_generations as i64 - gen_num as i64 - 1) * delta;
+            break;
+        }
         plants = next_plants;
+
         //eprintln!("{}", plants);
     }
     (
@@ -344,6 +378,12 @@ fn evolve_n_generations(plantation: &Plantation, num_generations: u32) -> (Plant
         },
         offset,
     )
+}
+
+#[aoc(day12, part2)]
+pub fn sum_of_pot_numbers_after_50_000_000_000_generations(plantation: &Plantation) -> i64 {
+    let (evolved, offset) = evolve_n_generations(plantation, 50_000_000_000);
+    sum_of_pot_numbers(&evolved, offset)
 }
 
 #[cfg(test)]

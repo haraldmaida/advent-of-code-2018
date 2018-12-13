@@ -67,7 +67,7 @@ mod part1 {
 
         assert_eq!(
             evolved.plants.to_string(),
-            ".....#....##....#####...#######....#.#..##...."
+            ".....#....##....#####...#######....#.#..##....."
         );
         assert_eq!(offset, -7);
     }
@@ -88,5 +88,18 @@ mod part1 {
         let answer = sum_of_pot_numbers_after_20_generations(&plantation);
 
         assert_eq!(answer, 3217);
+    }
+}
+
+mod part2 {
+    use super::*;
+
+    #[test]
+    fn answer() {
+        let plantation = parse(INPUT);
+
+        let answer = sum_of_pot_numbers_after_50_000_000_000_generations(&plantation);
+
+        assert_eq!(answer, 4000000000866);
     }
 }
