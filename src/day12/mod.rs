@@ -122,38 +122,7 @@
 use std::{
     fmt::{self, Display},
     iter::FromIterator,
-    mem,
 };
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct BitField {
-    chunks: Vec<u32>,
-    offset: i32,
-    len: i32,
-}
-
-impl BitField {
-    const BITS_PER_CHUNK: i32 = mem::size_of::<u32>() as i32 * 8;
-
-    pub fn new() -> Self {
-        Self {
-            chunks: Vec::new(),
-            offset: 0,
-            len: 0,
-        }
-    }
-
-    pub fn set(&mut self, index: i32) {
-        let idx = index - self.offset;
-        if idx > 0 && idx < self.len {
-            let array_index = idx / Self::BITS_PER_CHUNK;
-            let bit = 1 << (idx - array_index);
-            self.chunks[array_index as usize] |= bit;
-        } else {
-
-        }
-    }
-}
 
 fn fmt_pot(pot: bool) -> char {
     if pot {
