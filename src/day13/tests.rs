@@ -48,3 +48,34 @@ mod part1 {
         assert_eq!(answer, Position::new(65, 73));
     }
 }
+
+const EXAMPLE2_INPUT: &str = r#"/>-<\
+|   |
+| /<+-\
+| | | v
+\>+</ |
+  |   ^
+  \<->/
+"#;
+
+mod part2 {
+    use super::*;
+
+    #[test]
+    fn example2() {
+        let carts_n_tracks = parse(EXAMPLE2_INPUT);
+
+        let answer = location_of_last_cart(&carts_n_tracks);
+
+        assert_eq!(answer, Position::new(6, 4));
+    }
+
+    #[test]
+    fn answer() {
+        let carts_n_tracks = parse(INPUT);
+
+        let answer = location_of_last_cart(&carts_n_tracks);
+
+        assert_eq!(answer, Position::new(54, 66));
+    }
+}

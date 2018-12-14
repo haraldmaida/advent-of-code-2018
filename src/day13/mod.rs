@@ -200,6 +200,58 @@
 //!
 //! In this example, the location of the first crash is 7,3.
 //!
+//! ## Part 2
+//!
+//! There isn't much you can do to prevent crashes in this ridiculous system.
+//! However, by predicting the crashes, the Elves know where to be in advance
+//! and instantly remove the two crashing carts the moment any crash occurs.
+//!
+//! They can proceed like this for a while, but eventually, they're going to run
+//! out of carts. It could be useful to figure out where the last cart that
+//! hasn't crashed will end up.
+//!
+//! For example:
+//!
+//! ```text
+//! />-<\
+//! |   |
+//! | /<+-\
+//! | | | v
+//! \>+</ |
+//!   |   ^
+//!   \<->/
+//!
+//! /---\
+//! |   |
+//! | v-+-\
+//! | | | |
+//! \-+-/ |
+//!   |   |
+//!   ^---^
+//!
+//! /---\
+//! |   |
+//! | /-+-\
+//! | v | |
+//! \-+-/ |
+//!   ^   ^
+//!   \---/
+//!
+//! /---\
+//! |   |
+//! | /-+-\
+//! | | | |
+//! \-+-/ ^
+//!   |   |
+//!   \---/
+//! ```
+//!
+//! After four very expensive crashes, a tick ends with only one cart remaining;
+//! its final location is 6,4.
+//!
+//! What is the location of the last cart at the end of the first tick where it
+//! is the only cart left?
+//!
 //! [Advent of Code 2018 - Day 13](https://adventofcode.com/2018/day/13)
 
 use std::{
@@ -550,38 +602,62 @@ impl Tracks {
         (top_left, bottom_right)
     }
 
-    pub fn move_carts(&self, carts: &mut [Cart]) -> MoveResult {
+    pub fn move_carts(&self, carts: &mut Vec<Cart>) -> MoveResult {
+        let mut move_result = Moved;
+
         carts.sort_unstable_by_key(|cart| cart.position);
 
-        let mut collided = None;
         let mut cart_positions: HashSet<_> = HashSet::from_iter(carts.iter().map(|c| c.position));
 
-        for cart in carts.iter_mut() {
-            // move cart one step
-            cart_positions.remove(&cart.position);
-            let move_result = cart.move_one_step(self.rails[&cart.position]);
-            if let IllegalMove(dir, rail) = move_result {
-                return IllegalMove(dir, rail);
+        let mut processed = 0;
+        while processed < carts.len() {
+            let mut collided = None;
+
+            for cart in carts.iter_mut().skip(processed) {
+                processed += 1;
+                // move cart one step
+                cart_positions.remove(&cart.position);
+                let move_result = cart.move_one_step(self.rails[&cart.position]);
+                if let IllegalMove(dir, rail) = move_result {
+                    return IllegalMove(dir, rail);
+                }
+                // collision detection
+                if !cart_positions.insert(cart.position) {
+                    collided = Some(*cart);
+                    break;
+                }
             }
-            // collision detection
-            if !cart_positions.insert(cart.position) {
-                collided = Some(*cart);
-                break;
+
+            // remove eventually collided carts
+            if let Some(cart) = collided {
+                let mut collided = Vec::with_capacity(2);
+                if let Some(other_cart) = carts.iter().find_map(|c| {
+                    if *c != cart && c.position == cart.position {
+                        Some(*c)
+                    } else {
+                        None
+                    }
+                }) {
+                    collided.push(other_cart);
+                    collided.push(cart);
+
+                    // if first collision remember collision for move result
+                    if move_result == Moved {
+                        move_result = Collision(cart, other_cart);
+                    }
+                }
+                for cart in collided {
+                    if let Some(index) = carts.iter().position(|c| *c == cart) {
+                        if index + 1 <= processed {
+                            processed -= 1;
+                        }
+                        carts.remove(index);
+                    }
+                }
             }
         }
 
-        if let Some(cart) = collided {
-            if let Some(other_cart) = carts
-                .iter()
-                .find(|&other| cart != *other && other.position == cart.position)
-            {
-                Collision(cart, *other_cart)
-            } else {
-                Moved
-            }
-        } else {
-            Moved
-        }
+        move_result
     }
 }
 
@@ -666,11 +742,26 @@ impl CartsNTracks {
         }
     }
 
+    pub fn carts(&self) -> &[Cart] {
+        &self.carts
+    }
+
+    pub fn tracks(&self) -> &Tracks {
+        &self.tracks
+    }
+
     pub fn insert_cart(&mut self, position: Position, direction: Direction) {
         self.num_carts += 1;
         let cart = Cart::new(CartNo::new(self.num_carts), position, direction);
         self.carts.push(cart);
         self.insert_rail(position, direction.into());
+    }
+
+    pub fn remove_cart(&mut self, cart: &Cart) -> Option<Cart> {
+        self.carts
+            .iter()
+            .position(|c| *c == *cart)
+            .map(|idx| self.carts.remove(idx))
     }
 
     pub fn insert_rail(&mut self, position: Position, rail_kind: RailKind) {
@@ -731,14 +822,38 @@ fn parse(input: &str) -> CartsNTracks {
 #[aoc(day13, part1)]
 pub fn location_of_first_crash(carts_n_tracks: &CartsNTracks) -> Position {
     let mut carts_n_tracks = carts_n_tracks.clone();
-    //let mut step = 0;
+    let mut _step = 0;
     loop {
-        //step += 1;
+        _step += 1;
         let move_result = carts_n_tracks.move_carts();
-        //eprintln!("{:03}:\n{}", step, carts_n_tracks);
+        //eprintln!("{:03}:\n{}", _step, carts_n_tracks);
         match move_result {
             Moved => {},
             Collision(cart, _) => return cart.position,
+            IllegalMove(dir, rail) => panic!("illegal move in {} direction on rail {}", dir, rail),
+        }
+    }
+}
+
+#[aoc(day13, part2)]
+pub fn location_of_last_cart(carts_n_tracks: &CartsNTracks) -> Position {
+    let mut carts_n_tracks = carts_n_tracks.clone();
+    let mut _step = 0;
+    loop {
+        _step += 1;
+        let move_result = carts_n_tracks.move_carts();
+        //eprintln!("{:03}:\n{}", _step, carts_n_tracks);
+        match move_result {
+            Moved => {},
+            Collision(_, _) => {
+                if carts_n_tracks.carts().len() <= 1 {
+                    return carts_n_tracks
+                        .carts()
+                        .get(0)
+                        .unwrap_or_else(|| panic!("no cart left"))
+                        .position;
+                }
+            },
             IllegalMove(dir, rail) => panic!("illegal move in {} direction on rail {}", dir, rail),
         }
     }
