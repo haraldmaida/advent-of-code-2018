@@ -566,7 +566,7 @@ impl From<Direction> for RailKind {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, PartialEq)]
 pub struct Tracks {
     rails: HashMap<Position, RailKind>,
 }
@@ -648,7 +648,7 @@ impl Tracks {
                 }
                 for cart in collided {
                     if let Some(index) = carts.iter().position(|c| *c == cart) {
-                        if index + 1 <= processed {
+                        if index < processed {
                             processed -= 1;
                         }
                         carts.remove(index);
@@ -677,7 +677,7 @@ impl IndexMut<Position> for Tracks {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, PartialEq)]
 pub struct CartsNTracks {
     num_carts: u8,
     carts: Vec<Cart>,

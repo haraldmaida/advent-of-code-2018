@@ -113,7 +113,7 @@ impl Display for ScoreSeq {
 
 impl From<&[u8]> for ScoreSeq {
     fn from(value: &[u8]) -> Self {
-        ScoreSeq(Vec::from_iter(value.into_iter().map(|d| *d)))
+        ScoreSeq(Vec::from_iter(value.iter().cloned()))
     }
 }
 

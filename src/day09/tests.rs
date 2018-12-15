@@ -13,7 +13,7 @@ mod game_runner {
         assert_eq!(runner.marbles(), &[Marble(0)]);
         assert_eq!(runner.current_marble(), Marble(0));
         assert_eq!(runner.current_player(), PlayerNr(0));
-        assert_eq!(runner.score(&runner.current_player()), None);
+        assert_eq!(runner.score(runner.current_player()), None);
     }
 
     #[test]
@@ -27,7 +27,7 @@ mod game_runner {
         assert_eq!(runner.marbles(), &[Marble(0), Marble(1)]);
         assert_eq!(runner.current_marble(), Marble(1));
         assert_eq!(runner.current_player(), PlayerNr(1));
-        assert_eq!(runner.score(&runner.current_player()), Some(Score(0)));
+        assert_eq!(runner.score(runner.current_player()), Some(Score(0)));
     }
 
     #[test]
@@ -41,7 +41,7 @@ mod game_runner {
         assert_eq!(runner.marbles(), &[Marble(0), Marble(2), Marble(1)]);
         assert_eq!(runner.current_marble(), Marble(2));
         assert_eq!(runner.current_player(), PlayerNr(2));
-        assert_eq!(runner.score(&runner.current_player()), Some(Score(0)));
+        assert_eq!(runner.score(runner.current_player()), Some(Score(0)));
     }
 
     #[test]
@@ -58,7 +58,7 @@ mod game_runner {
         );
         assert_eq!(runner.current_marble(), Marble(3));
         assert_eq!(runner.current_player(), PlayerNr(3));
-        assert_eq!(runner.score(&runner.current_player()), Some(Score(0)));
+        assert_eq!(runner.score(runner.current_player()), Some(Score(0)));
     }
 
     #[test]
@@ -75,7 +75,7 @@ mod game_runner {
         );
         assert_eq!(runner.current_marble(), Marble(4));
         assert_eq!(runner.current_player(), PlayerNr(1));
-        assert_eq!(runner.score(&runner.current_player()), Some(Score(0)));
+        assert_eq!(runner.score(runner.current_player()), Some(Score(0)));
     }
 
     #[test]
@@ -99,7 +99,7 @@ mod game_runner {
         );
         assert_eq!(runner.current_marble(), Marble(5));
         assert_eq!(runner.current_player(), PlayerNr(2));
-        assert_eq!(runner.score(&runner.current_player()), Some(Score(0)));
+        assert_eq!(runner.score(runner.current_player()), Some(Score(0)));
     }
 
     #[test]
@@ -124,7 +124,7 @@ mod game_runner {
         );
         assert_eq!(runner.current_marble(), Marble(6));
         assert_eq!(runner.current_player(), PlayerNr(3));
-        assert_eq!(runner.score(&runner.current_player()), Some(Score(0)));
+        assert_eq!(runner.score(runner.current_player()), Some(Score(0)));
     }
 
     #[test]
@@ -150,7 +150,7 @@ mod game_runner {
         );
         assert_eq!(runner.current_marble(), Marble(7));
         assert_eq!(runner.current_player(), PlayerNr(1));
-        assert_eq!(runner.score(&runner.current_player()), Some(Score(0)));
+        assert_eq!(runner.score(runner.current_player()), Some(Score(0)));
     }
 
     #[test]
@@ -191,7 +191,7 @@ mod game_runner {
         );
         assert_eq!(runner.current_marble(), Marble(22));
         assert_eq!(runner.current_player(), PlayerNr(1));
-        assert_eq!(runner.score(&runner.current_player()), Some(Score(0)));
+        assert_eq!(runner.score(runner.current_player()), Some(Score(0)));
     }
 
     #[test]
@@ -231,7 +231,7 @@ mod game_runner {
         );
         assert_eq!(runner.current_marble(), Marble(23));
         assert_eq!(runner.current_player(), PlayerNr(2));
-        assert_eq!(runner.score(&runner.current_player()), Some(Score(32)));
+        assert_eq!(runner.score(runner.current_player()), Some(Score(32)));
     }
 
     #[test]
@@ -272,7 +272,7 @@ mod game_runner {
         );
         assert_eq!(runner.current_marble(), Marble(24));
         assert_eq!(runner.current_player(), PlayerNr(3));
-        assert_eq!(runner.score(&runner.current_player()), Some(Score(0)));
+        assert_eq!(runner.score(runner.current_player()), Some(Score(0)));
     }
 }
 
@@ -303,7 +303,7 @@ mod part1 {
 
         let answer = marble_highscore(&game);
 
-        assert_eq!(answer, Score(146373));
+        assert_eq!(answer, Score(146_373));
     }
 
     #[test]
@@ -321,7 +321,7 @@ mod part1 {
 
         let answer = marble_highscore(&game);
 
-        assert_eq!(answer, Score(54718));
+        assert_eq!(answer, Score(54_718));
     }
 
     #[test]
@@ -330,7 +330,7 @@ mod part1 {
 
         let answer = marble_highscore(&game);
 
-        assert_eq!(answer, Score(37305));
+        assert_eq!(answer, Score(37_305));
     }
 
     #[test]
@@ -339,7 +339,7 @@ mod part1 {
 
         let answer = marble_highscore(&game);
 
-        assert_eq!(answer, Score(439635));
+        assert_eq!(answer, Score(439_635));
     }
 }
 
@@ -353,6 +353,6 @@ mod part2 {
 
         let answer = marble_highscore(&game);
 
-        assert_eq!(answer, Score(3562722971));
+        assert_eq!(answer, Score(3_562_722_971));
     }
 }

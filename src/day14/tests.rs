@@ -123,6 +123,6 @@ mod part2 {
 
         let answer = num_needed_recipes(score_seq);
 
-        assert_eq!(answer, 20291131);
+        assert_eq!(answer, 20_291_131);
     }
 }

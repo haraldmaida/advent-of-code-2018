@@ -337,7 +337,8 @@ pub fn align_stars(sky: &Sky) -> Sky {
         let mut next_sky = last_sky.clone();
         next_sky.evolve();
         let (top_left, bottom_right) = next_sky.area();
-        let curr_area = (bottom_right.x - top_left.x) as i64 * (bottom_right.y - top_left.y) as i64;
+        let curr_area =
+            i64::from(bottom_right.x - top_left.x) * i64::from(bottom_right.y - top_left.y);
         if curr_area > last_area {
             break;
         } else {
@@ -356,7 +357,8 @@ pub fn time_to_aligned_stars(sky: &Sky) -> Duration {
     loop {
         sky.evolve();
         let (top_left, bottom_right) = sky.area();
-        let curr_area = (bottom_right.x - top_left.x) as i64 * (bottom_right.y - top_left.y) as i64;
+        let curr_area =
+            i64::from(bottom_right.x - top_left.x) * i64::from(bottom_right.y - top_left.y);
         if curr_area > last_area {
             break;
         } else {

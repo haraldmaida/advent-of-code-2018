@@ -53,7 +53,7 @@ mod part1 {
     fn example1() {
         let serial_no = SerialNo(18);
 
-        let (group, power) = max_power_cell_group(&serial_no);
+        let (group, power) = max_power_cell_group(serial_no);
 
         assert_eq!(group.coord, CellCoord::new(33, 45));
         assert_eq!(power, PowerLevel(29));
@@ -63,7 +63,7 @@ mod part1 {
     fn example2() {
         let serial_no = SerialNo(42);
 
-        let (group, power) = max_power_cell_group(&serial_no);
+        let (group, power) = max_power_cell_group(serial_no);
 
         assert_eq!(group.coord, CellCoord::new(21, 61));
         assert_eq!(power, PowerLevel(30));
@@ -87,7 +87,7 @@ mod part2 {
     fn example1() {
         let serial_no = SerialNo(18);
 
-        let (group, power) = max_power_cell_group_size(&serial_no);
+        let (group, power) = max_power_cell_group_size(serial_no);
 
         assert_eq!(group.coord, CellCoord::new(90, 269));
         assert_eq!(group.size, 16);
@@ -99,7 +99,7 @@ mod part2 {
     fn example2() {
         let serial_no = SerialNo(42);
 
-        let (group, power) = max_power_cell_group_size(&serial_no);
+        let (group, power) = max_power_cell_group_size(serial_no);
 
         assert_eq!(group.coord, CellCoord::new(232, 251));
         assert_eq!(group.size, 12);

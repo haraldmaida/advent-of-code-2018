@@ -137,7 +137,7 @@ impl Display for PowerLevel {
 
 impl From<i32> for PowerLevel {
     fn from(val: i32) -> Self {
-        PowerLevel(val.into())
+        PowerLevel(val)
     }
 }
 
@@ -226,11 +226,7 @@ impl CellGroup {
 
     pub fn power_level(&self, grid: &PowerGrid) -> PowerLevel {
         self.cells()
-            .map(|cell| {
-                let power = calc_cell_power(grid.serial_no, cell);
-                //eprintln!("{}: {}", cell, power);
-                power
-            })
+            .map(|cell| calc_cell_power(grid.serial_no, cell))
             .sum()
     }
 }
@@ -330,13 +326,14 @@ pub fn parse(input: &str) -> SerialNo {
 }
 
 #[aoc(day11, part1)]
+#[cfg_attr(feature = "cargo-clippy", allow(clippy::trivially_copy_pass_by_ref))]
 pub fn best_cell_group(serial_no: &SerialNo) -> CellCoord {
-    let (group, _power) = max_power_cell_group(serial_no);
+    let (group, _power) = max_power_cell_group(*serial_no);
     group.coord()
 }
 
-fn max_power_cell_group(serial_no: &SerialNo) -> (CellGroup, PowerLevel) {
-    let power_grid = PowerGrid::new(*serial_no, 300);
+fn max_power_cell_group(serial_no: SerialNo) -> (CellGroup, PowerLevel) {
+    let power_grid = PowerGrid::new(serial_no, 300);
     power_grid
         .cell_groups(3)
         .map(|group| {
@@ -349,12 +346,13 @@ fn max_power_cell_group(serial_no: &SerialNo) -> (CellGroup, PowerLevel) {
 }
 
 #[aoc(day11, part2)]
+#[cfg_attr(feature = "cargo-clippy", allow(clippy::trivially_copy_pass_by_ref))]
 pub fn best_cell_group_size(serial_no: &SerialNo) -> Answer {
-    max_power_cell_group_size(serial_no).into()
+    max_power_cell_group_size(*serial_no).into()
 }
 
-fn max_power_cell_group_size(serial_no: &SerialNo) -> (CellGroup, PowerLevel) {
-    let power_grid = PowerGrid::new(*serial_no, 300);
+fn max_power_cell_group_size(serial_no: SerialNo) -> (CellGroup, PowerLevel) {
+    let power_grid = PowerGrid::new(serial_no, 300);
     let mut max_per_group_size = Vec::with_capacity(power_grid.size() as usize);
     (1..=power_grid.size())
         .map(|group_size| {

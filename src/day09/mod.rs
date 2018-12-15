@@ -218,16 +218,16 @@ impl MarbleGame {
 pub struct MarbleRules;
 
 impl MarbleRules {
-    pub fn is_special(&self, marble: Marble) -> bool {
+    pub fn is_special(self, marble: Marble) -> bool {
         marble.val() % 23 == 0
     }
 
-    pub fn next_marble(&self, marble: Marble) -> Marble {
+    pub fn next_marble(self, marble: Marble) -> Marble {
         Marble(marble.val() + 1)
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Ring<T> {
     list: Vec<T>,
 }
@@ -326,8 +326,8 @@ impl GameRunner {
         self.ring.as_ref()
     }
 
-    pub fn score(&self, player_nr: &PlayerNr) -> Option<Score> {
-        self.scores.get(player_nr).map(ToOwned::to_owned)
+    pub fn score(&self, player_nr: PlayerNr) -> Option<Score> {
+        self.scores.get(&player_nr).map(ToOwned::to_owned)
     }
 
     pub fn current_marble(&self) -> Marble {
@@ -406,6 +406,7 @@ pub fn parse(input: &str) -> MarbleGame {
 }
 
 #[aoc(day9, part1)]
+#[cfg_attr(feature = "cargo-clippy", allow(clippy::trivially_copy_pass_by_ref))]
 pub fn marble_highscore(marble_game: &MarbleGame) -> Score {
     let runner = marble_game.runner();
     runner
@@ -417,6 +418,7 @@ pub fn marble_highscore(marble_game: &MarbleGame) -> Score {
 }
 
 #[aoc(day9, part2)]
+#[cfg_attr(feature = "cargo-clippy", allow(clippy::trivially_copy_pass_by_ref))]
 pub fn marble_highscore_100(marble_game: &MarbleGame) -> Score {
     let marble_game = MarbleGame::new(marble_game.num_marbles * 100, marble_game.num_players);
     let runner = marble_game.runner();

@@ -100,6 +100,6 @@ mod part2 {
 
         let answer = sum_of_pot_numbers_after_50_000_000_000_generations(&plantation);
 
-        assert_eq!(answer, 4000000000866);
+        assert_eq!(answer, 4_000_000_000_866);
     }
 }

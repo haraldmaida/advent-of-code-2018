@@ -278,11 +278,12 @@ pub fn largest_area(points: &[Point]) -> (Point, u32) {
         let bottom_right = points
             .iter()
             .find(|other| other.y > point.y && other.x > point.x);
+        #[cfg_attr(feature = "cargo-clippy", allow(clippy::single_match))]
         match (top_left, top_right, bottom_left, bottom_right) {
             (Some(_), Some(_), Some(_), Some(_)) => {
                 valid_points.insert(point);
-            }
-            _ => {}
+            },
+            _ => {},
         }
     }
 

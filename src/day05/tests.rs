@@ -88,6 +88,7 @@ mod part2 {
         assert_eq!(answer, ('c', "daDA".into()));
     }
 
+    #[ignore]
     #[test]
     fn answer() {
         let answer = improved_polymer_len(INPUT);
