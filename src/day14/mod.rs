@@ -70,30 +70,34 @@
 //! What are the scores of the ten recipes immediately after the number of
 //! recipes in your puzzle input?
 //!
+//! ## Part 2
+//!
+//! As it turns out, you got the Elves' plan backwards. They actually want to
+//! know how many recipes appear on the scoreboard to the left of the first
+//! recipes whose scores are the digits from your puzzle input.
+//!
+//! * 51589 first appears after 9 recipes.
+//! * 01245 first appears after 5 recipes.
+//! * 92510 first appears after 18 recipes.
+//! * 59414 first appears after 2018 recipes.
+//!
+//! How many recipes appear on the scoreboard to the left of the score sequence
+//! in your puzzle input?
+//!
 //! [Advent of Code 2018 - Day 14](https://adventofcode.com/2018/day/14)
 
 use std::{
     fmt::{self, Display},
     iter::FromIterator,
+    str::FromStr,
 };
 
-const SCORE_SEQ_LEN: usize = 10;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Score(u8);
-
-impl Display for Score {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct ScoreSeq([u8; SCORE_SEQ_LEN]);
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ScoreSeq(Vec<u8>);
 
 impl Display for ScoreSeq {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatted = String::with_capacity(31);
+        let mut formatted = String::with_capacity(21);
         formatted.push('[');
         for score in &self.0 {
             formatted.push(char::from(*score + 0x30));
@@ -104,6 +108,39 @@ impl Display for ScoreSeq {
         formatted.pop();
         formatted.push(']');
         f.write_str(&formatted)
+    }
+}
+
+impl From<&[u8]> for ScoreSeq {
+    fn from(value: &[u8]) -> Self {
+        ScoreSeq(Vec::from_iter(value.into_iter().map(|d| *d)))
+    }
+}
+
+impl AsRef<[u8]> for ScoreSeq {
+    fn as_ref(&self) -> &[u8] {
+        &self.0
+    }
+}
+
+impl FromIterator<u8> for ScoreSeq {
+    fn from_iter<T: IntoIterator<Item = u8>>(iter: T) -> Self {
+        ScoreSeq(Vec::from_iter(iter.into_iter()))
+    }
+}
+
+impl FromStr for ScoreSeq {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut digits = Vec::with_capacity(s.len());
+        for chr in s.chars() {
+            let digit = chr
+                .to_digit(10)
+                .ok_or_else(|| format!("not a number: {}", s))?;
+            digits.push(digit as u8);
+        }
+        Ok(ScoreSeq(digits))
     }
 }
 
@@ -135,15 +172,8 @@ impl Scoreboard {
         Scoreboard(Vec::from_iter(scores.into_iter()))
     }
 
-    pub fn score_seq(&self, num_recipes: usize) -> ScoreSeq {
-        let mut scores = [0; SCORE_SEQ_LEN];
-        for (i, score) in self.0[num_recipes..num_recipes + SCORE_SEQ_LEN]
-            .iter()
-            .enumerate()
-        {
-            scores[i] = *score;
-        }
-        ScoreSeq(scores)
+    pub fn score_seq(&self, num_recipes: usize, num_scores: usize) -> ScoreSeq {
+        ScoreSeq::from(&self.0[num_recipes..num_recipes + num_scores])
     }
 }
 
@@ -152,17 +182,15 @@ pub struct Recipes {
     sequence: Vec<u8>,
     elf1: usize,
     elf2: usize,
-    take: usize,
     current: usize,
 }
 
 impl Recipes {
-    pub fn new(num_recipes: usize, recipe1: u8, recipe2: u8) -> Self {
+    pub fn new(recipe1: u8, recipe2: u8) -> Self {
         Recipes {
             sequence: vec![recipe1, recipe2],
             elf1: 0,
             elf2: 1,
-            take: SCORE_SEQ_LEN + num_recipes,
             current: 0,
         }
     }
@@ -172,10 +200,6 @@ impl<'a> Iterator for Recipes {
     type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.take == 0 {
-            return None;
-        }
-        self.take -= 1;
         while self.current >= self.sequence.len() {
             let sum = self.sequence[self.elf1] + self.sequence[self.elf2];
             if sum >= 10 {
@@ -192,19 +216,37 @@ impl<'a> Iterator for Recipes {
     }
 }
 
-#[aoc_generator(day14)]
-pub fn parse(input: &str) -> usize {
-    input
+#[aoc(day14, part1)]
+pub fn score_seq_after_num_recipes(input: &str) -> ScoreSeq {
+    let num_recipes = input
         .trim()
-        .parse()
-        .unwrap_or_else(|_| panic!("not a valid integer: {:?}", input.trim()))
+        .parse::<usize>()
+        .unwrap_or_else(|_| panic!("not a valid integer: {:?}", input.trim()));
+    let num_scores = 10;
+    let recipes = Recipes::new(3, 7);
+    let scoreboard = Scoreboard::from_iter(recipes.take(num_recipes + num_scores));
+    scoreboard.score_seq(num_recipes, num_scores)
 }
 
-#[aoc(day14, part1)]
-pub fn score_seq_after_num_recipes(num_recipes: &usize) -> ScoreSeq {
-    let recipes = Recipes::new(*num_recipes, 3, 7);
-    let scoreboard = Scoreboard::from_iter(recipes);
-    scoreboard.score_seq(*num_recipes)
+#[aoc(day14, part2)]
+pub fn num_needed_recipes(input: &str) -> usize {
+    let score_seq = ScoreSeq::from_str(input.trim())
+        .unwrap_or_else(|_| panic!("not a valid integer: {:?}", input.trim()));
+    let score_seq_len = score_seq.as_ref().len();
+    let mut recipes = Recipes::new(3, 7);
+    loop {
+        let seq_len = recipes.sequence.len();
+        if seq_len > score_seq_len {
+            let offset = seq_len - score_seq_len;
+            if &recipes.sequence[offset..] == score_seq.as_ref() {
+                break offset;
+            }
+            if &recipes.sequence[offset - 1..seq_len - 1] == score_seq.as_ref() {
+                break offset - 1;
+            }
+        }
+        recipes.next();
+    }
 }
 
 #[cfg(test)]
