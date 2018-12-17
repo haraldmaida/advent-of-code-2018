@@ -136,7 +136,7 @@ pub fn parse(input: &str) -> Vec<Record> {
                     .unwrap_or_else(|_| {
                         panic!("not a guard id in line {}", line);
                     })
-            }
+            },
             "falls" => {
                 let day = line[1..11].to_owned();
                 let hour = line[12..14].parse().unwrap_or_else(|_| {
@@ -152,7 +152,7 @@ pub fn parse(input: &str) -> Vec<Record> {
                     minute,
                     event: Event::FallAsleep,
                 })
-            }
+            },
             "wakes" => {
                 let day = line[1..11].to_owned();
                 let hour = line[12..14]
@@ -168,7 +168,7 @@ pub fn parse(input: &str) -> Vec<Record> {
                     minute,
                     event: Event::WakeUp,
                 })
-            }
+            },
             _ => unreachable!(&format!("invalid line: {}", line)),
         }
     }
@@ -193,7 +193,7 @@ fn sleeping_periods(input: &[Record]) -> HashMap<GuardId, Vec<(u8, u8)>> {
                     .entry(record.guard_id)
                     .and_modify(|times| times.push(sleep_period))
                     .or_insert_with(|| vec![sleep_period]);
-            }
+            },
         }
     }
     sleeping_periods

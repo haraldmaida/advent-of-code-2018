@@ -71,8 +71,8 @@
 //! For example, again using the above nodes:
 //!
 //! * Node C has one metadata entry, 2. Because node C has only one child node,
-//!   2 references a child node which does not exist, and so the value of node
-//!   C is 0.
+//!   2 references a child node which does not exist, and so the value of node C
+//!   is 0.
 //! * Node A has three metadata entries: 1, 1, and 2. The 1 references node A's
 //!   first child node, B, and the 2 references node A's second child node, C.
 //!   Because node B has a value of 33 and node C has a value of 0, the value of

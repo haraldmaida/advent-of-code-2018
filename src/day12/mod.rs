@@ -338,7 +338,7 @@ fn evolve_n_generations(plantation: &Plantation, num_generations: u64) -> (Plant
         }
         plants = next_plants;
 
-        //eprintln!("{}", plants);
+        debug!("{}", plants);
     }
     (
         Plantation {

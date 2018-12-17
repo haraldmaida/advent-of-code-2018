@@ -826,7 +826,7 @@ pub fn location_of_first_crash(carts_n_tracks: &CartsNTracks) -> Position {
     loop {
         _step += 1;
         let move_result = carts_n_tracks.move_carts();
-        //eprintln!("{:03}:\n{}", _step, carts_n_tracks);
+        debug!("{:03}:\n{}", _step, carts_n_tracks);
         match move_result {
             Moved => {},
             Collision(cart, _) => return cart.position,
@@ -842,7 +842,7 @@ pub fn location_of_last_cart(carts_n_tracks: &CartsNTracks) -> Position {
     loop {
         _step += 1;
         let move_result = carts_n_tracks.move_carts();
-        //eprintln!("{:03}:\n{}", _step, carts_n_tracks);
+        debug!("{:03}:\n{}", _step, carts_n_tracks);
         match move_result {
             Moved => {},
             Collision(_, _) => {

@@ -13,8 +13,8 @@
 //! edges parallel to the edges of the fabric. Each claim's rectangle is defined
 //! as follows:
 //!
-//! * The number of inches between the left edge of the fabric and the left
-//!   edge of the rectangle.
+//! * The number of inches between the left edge of the fabric and the left edge
+//!   of the rectangle.
 //! * The number of inches between the top edge of the fabric and the top edge
 //!   of the rectangle.
 //! * The width of the rectangle in inches.
@@ -80,12 +80,7 @@
 //!
 //! [Advent of Code 2018 - Day 3](https://adventofcode.com/2018/day/3)
 
-use std::{
-    collections::HashSet,
-    iter::FromIterator,
-    num::ParseIntError,
-    str::FromStr,
-};
+use std::{collections::HashSet, iter::FromIterator, num::ParseIntError, str::FromStr};
 
 pub type ClaimId = u32;
 
@@ -140,7 +135,7 @@ impl FromStr for Claim {
                 ',' => token = Token::Top,
                 ':' => token = Token::Width,
                 'x' => token = Token::Height,
-                _ if char.is_whitespace() => {}
+                _ if char.is_whitespace() => {},
                 _ if char.is_digit(10) => match token {
                     Token::Id => id.push(char),
                     Token::Left => left.push(char),
@@ -152,14 +147,14 @@ impl FromStr for Claim {
                             "unexpected character {} while parsing {:?}",
                             char, token
                         )));
-                    }
+                    },
                 },
                 _ => {
                     return Err(ParseError::UnknownToken(format!(
                         "unexpected character {} in {}",
                         char, s
                     )));
-                }
+                },
             }
         }
 
