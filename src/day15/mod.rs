@@ -370,7 +370,110 @@
 //!
 //! What is the outcome of the combat described in your puzzle input?
 //!
-//! [Advent of Code 2018 - Day 14](https://adventofcode.com/2018/day/14)
+//! ## Part 2
+//!
+//! According to your calculations, the Elves are going to lose badly. Surely,
+//! you won't mess up the timeline too much if you give them just a little
+//! advanced technology, right?
+//!
+//! You need to make sure the Elves not only win, but also suffer no losses:
+//! even the death of a single Elf is unacceptable.
+//!
+//! However, you can't go too far: larger changes will be more likely to
+//! permanently alter spacetime.
+//!
+//! So, you need to find the outcome of the battle in which the Elves have the
+//! lowest integer attack power (at least 4) that allows them to win without a
+//! single death. The Goblins always have an attack power of 3.
+//!
+//! In the first summarized example above, the lowest attack power the Elves
+//! need to win without losses is 15:
+//!
+//! ```text
+//! #######       #######
+//! #.G...#       #..E..#   E(158)
+//! #...EG#       #...E.#   E(14)
+//! #.#.#G#  -->  #.#.#.#
+//! #..G#E#       #...#.#
+//! #.....#       #.....#
+//! #######       #######
+//!
+//! Combat ends after 29 full rounds
+//! Elves win with 172 total hit points left
+//! Outcome: 29 * 172 = 4988
+//! ```
+//!
+//! In the second example above, the Elves need only 4 attack power:
+//!
+//! ```text
+//! #######       #######
+//! #E..EG#       #.E.E.#   E(200), E(23)
+//! #.#G.E#       #.#E..#   E(200)
+//! #E.##E#  -->  #E.##E#   E(125), E(200)
+//! #G..#.#       #.E.#.#   E(200)
+//! #..E#.#       #...#.#
+//! #######       #######
+//!
+//! Combat ends after 33 full rounds
+//! Elves win with 948 total hit points left
+//! Outcome: 33 * 948 = 31284
+//! ```
+//!
+//! In the third example above, the Elves need 15 attack power:
+//!
+//! ```text
+//! #######       #######
+//! #E.G#.#       #.E.#.#   E(8)
+//! #.#G..#       #.#E..#   E(86)
+//! #G.#.G#  -->  #..#..#
+//! #G..#.#       #...#.#
+//! #...E.#       #.....#
+//! #######       #######
+//!
+//! Combat ends after 37 full rounds
+//! Elves win with 94 total hit points left
+//! Outcome: 37 * 94 = 3478
+//! ```
+//!
+//! In the fourth example above, the Elves need 12 attack power:
+//!
+//! ```text
+//! #######       #######
+//! #.E...#       #...E.#   E(14)
+//! #.#..G#       #.#..E#   E(152)
+//! #.###.#  -->  #.###.#
+//! #E#G#G#       #.#.#.#
+//! #...#G#       #...#.#
+//! #######       #######
+//!
+//! Combat ends after 39 full rounds
+//! Elves win with 166 total hit points left
+//! Outcome: 39 * 166 = 6474
+//! ```
+//!
+//! In the last example above, the lone Elf needs 34 attack power:
+//!
+//! ```text
+//! #########       #########
+//! #G......#       #.......#
+//! #.E.#...#       #.E.#...#   E(38)
+//! #..##..G#       #..##...#
+//! #...##..#  -->  #...##..#
+//! #...#...#       #...#...#
+//! #.G...G.#       #.......#
+//! #.....G.#       #.......#
+//! #########       #########
+//!
+//! Combat ends after 30 full rounds
+//! Elves win with 38 total hit points left
+//! Outcome: 30 * 38 = 1140
+//! ```
+//!
+//! After increasing the Elves' attack power until it is just barely enough for
+//! them to win without any Elves dying, what is the outcome of the combat
+//! described in your puzzle input?
+//!
+//! [Advent of Code 2018 - Day 15](https://adventofcode.com/2018/day/15)
 
 use std::{
     cmp::{Ord, Ordering, PartialOrd},
@@ -379,7 +482,7 @@ use std::{
     hash::{Hash, Hasher},
     iter::FromIterator,
     marker::PhantomData,
-    ops::{Add, Sub, SubAssign},
+    ops::{Add, AddAssign, Sub, SubAssign},
 };
 
 use self::FightResult::*;
@@ -656,6 +759,18 @@ impl Default for AttackPower {
     }
 }
 
+impl AddAssign<i32> for AttackPower {
+    fn add_assign(&mut self, rhs: i32) {
+        self.0 += rhs;
+    }
+}
+
+impl SubAssign<i32> for AttackPower {
+    fn sub_assign(&mut self, rhs: i32) {
+        self.0 -= rhs;
+    }
+}
+
 impl Sub<AttackPower> for HitPoints {
     type Output = HitPoints;
 
@@ -698,6 +813,16 @@ impl<'a> HasId<Elf> for &'a Elf {
     }
 }
 
+impl HasHitPoints for Elf {
+    fn hit_points(&self) -> HitPoints {
+        self.hit_points
+    }
+
+    fn hit_points_mut(&mut self) -> &mut HitPoints {
+        &mut self.hit_points
+    }
+}
+
 impl Elf {
     pub fn new(id: Id<Self>) -> Self {
         Self {
@@ -735,6 +860,16 @@ impl<'a> HasId<Goblin> for &'a Goblin {
     }
 }
 
+impl HasHitPoints for Goblin {
+    fn hit_points(&self) -> HitPoints {
+        self.hit_points
+    }
+
+    fn hit_points_mut(&mut self) -> &mut HitPoints {
+        &mut self.hit_points
+    }
+}
+
 impl Goblin {
     pub fn new(id: Id<Self>) -> Self {
         Self {
@@ -750,6 +885,12 @@ where
     Self: Sized,
 {
     fn id(self) -> Id<T>;
+}
+
+pub trait HasHitPoints {
+    fn hit_points(&self) -> HitPoints;
+
+    fn hit_points_mut(&mut self) -> &mut HitPoints;
 }
 
 pub trait WithHitPoints<T: Unit> {
@@ -868,6 +1009,8 @@ pub struct Combat {
     elves: HashMap<Position, Elf>,
     goblins: HashMap<Position, Goblin>,
     rounds: u32,
+    elves_attack_power: AttackPower,
+    goblins_attack_power: AttackPower,
 }
 
 impl Display for Combat {
@@ -941,6 +1084,8 @@ impl Combat {
             elves,
             goblins,
             rounds: 0,
+            elves_attack_power: AttackPower::default(),
+            goblins_attack_power: AttackPower::default(),
         }
     }
 
@@ -998,13 +1143,25 @@ impl Combat {
 
         let mut num_acting_units = 0;
         for unit in units {
-            if let Some(enemy) = self.enemy_to_attack(unit) {
-                self.attack(enemy);
-            } else if let Some(new_position) = self.move_toward_enemy(unit) {
-                if let Some(enemy) = self.enemy_to_attack(new_position) {
-                    self.attack(enemy);
+            if self.elves.contains_key(&unit) {
+                if let Some(goblin) = enemy_to_attack(unit, &self.goblins) {
+                    attack_enemy(goblin, self.elves_attack_power, &mut self.goblins);
+                } else if let Some(new_position) = self.move_elf_towards_goblins(unit) {
+                    if let Some(goblin) = enemy_to_attack(new_position, &self.goblins) {
+                        attack_enemy(goblin, self.elves_attack_power, &mut self.goblins);
+                    }
                 }
-            }
+            } else if self.goblins.contains_key(&unit) {
+                if let Some(elf) = enemy_to_attack(unit, &self.elves) {
+                    attack_enemy(elf, self.goblins_attack_power, &mut self.elves);
+                } else if let Some(new_position) = self.move_goblin_towards_elfs(unit) {
+                    if let Some(elf) = enemy_to_attack(new_position, &self.elves) {
+                        attack_enemy(elf, self.goblins_attack_power, &mut self.elves);
+                    }
+                }
+            } else {
+                //panic!("WTF! unit must be either an elf or a goblin: {:?}", unit);
+            };
             num_acting_units += 1;
             if self.elves.is_empty() || self.goblins.is_empty() {
                 break;
@@ -1040,92 +1197,12 @@ impl Combat {
         }
     }
 
-    fn enemy_to_attack(&self, unit: Position) -> Option<Position> {
-        let mut adjacent_positions = HashSet::with_capacity(4);
-        let mut eventually_add_position = |maybe_position| {
-            if let Some(position) = maybe_position {
-                adjacent_positions.insert(position);
-            }
-        };
-        eventually_add_position(unit.north());
-        eventually_add_position(unit.west());
-        eventually_add_position(unit.east());
-        eventually_add_position(unit.south());
-
-        if self.elves.contains_key(&unit) {
-            self.goblins
-                .iter()
-                .filter(|(pos, _)| adjacent_positions.contains(pos))
-                .min_by(|(pos1, unit1), (pos2, unit2)| {
-                    let hit_cmp = unit1.hit_points.cmp(&unit2.hit_points);
-                    if hit_cmp == Ordering::Equal {
-                        pos1.cmp(pos2)
-                    } else {
-                        hit_cmp
-                    }
-                })
-                .map(|(pos, _)| *pos)
-        } else if self.goblins.contains_key(&unit) {
-            self.elves
-                .iter()
-                .filter(|(pos, _)| adjacent_positions.contains(pos))
-                .min_by(|(pos1, unit1), (pos2, unit2)| {
-                    let hit_cmp = unit1.hit_points.cmp(&unit2.hit_points);
-                    if hit_cmp == Ordering::Equal {
-                        pos1.cmp(pos2)
-                    } else {
-                        hit_cmp
-                    }
-                })
-                .map(|(pos, _)| *pos)
-        } else {
-            None
-        }
-    }
-
-    fn attack(&mut self, enemy: Position) {
-        let elf_died = if let Some(elf) = self.elves.get_mut(&enemy) {
-            elf.hit_points -= AttackPower::default();
-            debug!("attacked elf {:?}", elf);
-            elf.hit_points <= HitPoints::ZERO
-        } else {
-            false
-        };
-        if elf_died {
-            self.elves.remove(&enemy);
-        }
-        let goblin_died = if let Some(goblin) = self.goblins.get_mut(&enemy) {
-            goblin.hit_points -= AttackPower::default();
-            debug!("attacked goblin {:?}", goblin);
-            goblin.hit_points <= HitPoints::ZERO
-        } else {
-            false
-        };
-        if goblin_died {
-            self.goblins.remove(&enemy);
-        }
-    }
-
-    fn move_elf(&mut self, elf: Position, target: Position) -> Option<Position> {
-        self.elves.remove(&elf).and_then(|elf| {
-            self.elves.insert(target, elf);
-            Some(target)
-        })
-    }
-
-    fn move_goblin(&mut self, goblin: Position, target: Position) -> Option<Position> {
-        self.goblins.remove(&goblin).and_then(|goblin| {
-            self.goblins.insert(target, goblin);
-            Some(target)
-        })
-    }
-
-    fn move_toward_enemy(&mut self, unit: Position) -> Option<Position> {
+    fn move_goblin_towards_elfs(&mut self, goblin: Position) -> Option<Position> {
         let eventually_add_adjacents_of_enemy =
             |enemy: Position, targets: &mut HashSet<Position>| {
                 let mut eventually_add_target = |maybe_target| {
                     if let Some(target) = maybe_target {
-                        if target != unit && self.is_free_position(target) {
+                        if target != goblin && self.is_free_position(target) {
                             targets.insert(target);
                         }
                     }
@@ -1136,36 +1213,48 @@ impl Combat {
                 eventually_add_target(enemy.south());
             };
 
-        if self.elves.contains_key(&unit) {
-            let mut targets = HashSet::with_capacity(4);
-            self.goblins
-                .keys()
-                .for_each(|enemy| eventually_add_adjacents_of_enemy(*enemy, &mut targets));
-            debug!(
-                "trying to move elf {} to possible targets: {:?}",
-                unit, targets
-            );
+        let mut targets = HashSet::with_capacity(4);
+        self.elves
+            .keys()
+            .for_each(|enemy| eventually_add_adjacents_of_enemy(*enemy, &mut targets));
+        debug!(
+            "trying to move goblin {} torwards possible targets: {:?}",
+            goblin, targets
+        );
 
-            self.path_to_nearest_target(unit, targets)
-                .and_then(|path| path.get(1).cloned())
-                .and_then(|step1| self.move_elf(unit, step1))
-        } else if self.goblins.contains_key(&unit) {
-            let mut targets = HashSet::with_capacity(4);
-            self.elves
-                .keys()
-                .for_each(|enemy| eventually_add_adjacents_of_enemy(*enemy, &mut targets));
-            debug!(
-                "trying to move goblin {} to possible targets: {:?}",
-                unit, targets
-            );
+        self.path_to_nearest_target(goblin, targets)
+            .and_then(|path| path.get(1).cloned())
+            .and_then(|step1| move_unit(goblin, step1, &mut self.goblins))
+    }
 
-            self.path_to_nearest_target(unit, targets)
-                .and_then(|path| path.get(1).cloned())
-                .and_then(|step1| self.move_goblin(unit, step1))
-        } else {
-            debug!("WTF!! - neither elf nor goblin!");
-            None
-        }
+    fn move_elf_towards_goblins(&mut self, elf: Position) -> Option<Position> {
+        let eventually_add_adjacents_of_enemy =
+            |enemy: Position, targets: &mut HashSet<Position>| {
+                let mut eventually_add_target = |maybe_target| {
+                    if let Some(target) = maybe_target {
+                        if target != elf && self.is_free_position(target) {
+                            targets.insert(target);
+                        }
+                    }
+                };
+                eventually_add_target(enemy.north());
+                eventually_add_target(enemy.west());
+                eventually_add_target(enemy.east());
+                eventually_add_target(enemy.south());
+            };
+
+        let mut targets = HashSet::with_capacity(4);
+        self.goblins
+            .keys()
+            .for_each(|enemy| eventually_add_adjacents_of_enemy(*enemy, &mut targets));
+        debug!(
+            "trying to move elf {} torwards possible targets: {:?}",
+            elf, targets
+        );
+
+        self.path_to_nearest_target(elf, targets)
+            .and_then(|path| path.get(1).cloned())
+            .and_then(|step1| move_unit(elf, step1, &mut self.elves))
     }
 
     fn path_to_nearest_target(
@@ -1277,6 +1366,68 @@ impl Combat {
     }
 }
 
+fn move_unit<T>(
+    unit: Position,
+    target: Position,
+    unit_positions: &mut HashMap<Position, T>,
+) -> Option<Position> {
+    unit_positions.remove(&unit).and_then(|unit| {
+        unit_positions.insert(target, unit);
+        Some(target)
+    })
+}
+
+fn enemy_to_attack<T>(unit: Position, enemies: &HashMap<Position, T>) -> Option<Position>
+where
+    T: HasHitPoints,
+{
+    let mut adjacent_positions = HashSet::with_capacity(4);
+    let mut eventually_add_position = |maybe_position| {
+        if let Some(position) = maybe_position {
+            adjacent_positions.insert(position);
+        }
+    };
+    eventually_add_position(unit.north());
+    eventually_add_position(unit.west());
+    eventually_add_position(unit.east());
+    eventually_add_position(unit.south());
+
+    enemies
+        .iter()
+        .filter(|(pos, _)| adjacent_positions.contains(pos))
+        .min_by(|(pos1, unit1), (pos2, unit2)| {
+            let hit_cmp = unit1.hit_points().cmp(&unit2.hit_points());
+            if hit_cmp == Ordering::Equal {
+                pos1.cmp(pos2)
+            } else {
+                hit_cmp
+            }
+        })
+        .map(|(pos, _)| *pos)
+}
+
+fn attack_enemy<T>(
+    position: Position,
+    attack_power: AttackPower,
+    enemies: &mut HashMap<Position, T>,
+) -> Option<(Position, T)>
+where
+    T: HasHitPoints + Debug,
+{
+    let enemy_died = if let Some(enemy) = enemies.get_mut(&position) {
+        *enemy.hit_points_mut() -= attack_power;
+        debug!("attacked {:?}", enemy);
+        enemy.hit_points() <= HitPoints::ZERO
+    } else {
+        false
+    };
+    if enemy_died {
+        enemies.remove(&position).map(|enemy| (position, enemy))
+    } else {
+        None
+    }
+}
+
 #[aoc_generator(day15)]
 pub fn parse(input: &str) -> Combat {
     let mut elf_id_seq = IdSequence::default();
@@ -1314,32 +1465,68 @@ pub fn parse(input: &str) -> Combat {
 #[aoc(day15, part1)]
 pub fn fight(combat_map: &Combat) -> i32 {
     let mut combat = combat_map.clone();
-    match combat.fight() {
+    calculate_outcome(combat.fight(), combat.rounds())
+}
+
+fn calculate_outcome(fight_result: FightResult, rounds: u32) -> i32 {
+    match fight_result {
         WinnerElves(remaining_hitpoints) => {
             debug!(
                 "Elves win after {} rounds with {} total hit points left!",
-                combat.rounds(),
-                remaining_hitpoints
+                rounds, remaining_hitpoints
             );
-            remaining_hitpoints.val() * combat.rounds() as i32
+            remaining_hitpoints.val() * rounds as i32
         },
         WinnerGoblins(remaining_hitpoints) => {
             debug!(
                 "Goblins win after {} rounds with {} total hit points left!",
-                combat.rounds(),
-                remaining_hitpoints
+                rounds, remaining_hitpoints
             );
-            remaining_hitpoints.val() * combat.rounds() as i32
+            remaining_hitpoints.val() * rounds as i32
         },
         Tie => {
-            debug!(
-                "The combat ended with a tie after {} rounds",
-                combat.rounds()
-            );
+            debug!("The combat ended with a tie after {} rounds", rounds);
             0
         },
         Ongoing => unreachable!(),
     }
+}
+
+#[aoc(day15, part2)]
+pub fn fake_fight(combat_map: &Combat) -> i32 {
+    let combat = combat_map.clone();
+    let (_, rounds, fight_result) = least_attach_power_for_elves_to_win(combat);
+    calculate_outcome(fight_result, rounds)
+}
+
+fn least_attach_power_for_elves_to_win(initial_combat: Combat) -> (AttackPower, u32, FightResult) {
+    let orig_num_elves = initial_combat.elves.len();
+    let mut combat = initial_combat.clone();
+    let mut faked_attack_power = AttackPower(4);
+    combat.elves_attack_power = faked_attack_power;
+    let fight = 'fighting: loop {
+        debug!("combat:\n{}", combat);
+        let fight = combat.fight_one_round();
+        let lost_lives = orig_num_elves - combat.elves.len();
+        if lost_lives > 0 {
+            faked_attack_power += 1;
+            combat = initial_combat.clone();
+            combat.elves_attack_power = faked_attack_power;
+            debug!(
+                "elves lost {} lives -> trying with fake power of {}",
+                lost_lives, combat.elves_attack_power
+            );
+        }
+        if fight != Ongoing {
+            debug!("finished combat:\n{}", combat);
+            break 'fighting fight;
+        }
+    };
+    info!(
+        "elves win with faked attack power of {}",
+        combat.elves_attack_power
+    );
+    (combat.elves_attack_power, combat.rounds(), fight)
 }
 
 #[cfg(test)]
