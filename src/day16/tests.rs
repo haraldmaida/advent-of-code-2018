@@ -42,3 +42,16 @@ mod part1 {
         assert_eq!(answer, 646);
     }
 }
+
+mod part2 {
+    use super::*;
+
+    #[test]
+    fn answer() {
+        let samples_n_program = parse(INPUT).unwrap();
+
+        let answer = run_program(&samples_n_program);
+
+        assert_eq!(answer, Register::from([681, 681, 3, 0]));
+    }
+}

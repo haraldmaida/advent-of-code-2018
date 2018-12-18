@@ -123,10 +123,19 @@
 //! Ignoring the opcode numbers, how many samples in your puzzle input behave
 //! like three or more opcodes?
 //!
+//! ## Part 2
+//!
+//! Using the samples you collected, work out the number of each opcode and
+//! execute the test program (the second section of your puzzle input).
+//!
+//! What value is contained in register 0 after executing the test program?
+//!
 //! [Advent of Code 2018 - Day 16](https://adventofcode.com/2018/day/16)
 
 use std::{
+    collections::{HashMap, HashSet},
     fmt::{self, Display},
+    iter::FromIterator,
     ops::{Index, IndexMut},
 };
 
@@ -165,7 +174,7 @@ impl Display for OpCode {
     }
 }
 
-pub type Data = u8;
+pub type Data = i32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Register([Data; 4]);
@@ -177,6 +186,12 @@ impl Display for Register {
             "[{}, {}, {}, {}]",
             self.0[0], self.0[1], self.0[2], self.0[3]
         )
+    }
+}
+
+impl Default for Register {
+    fn default() -> Self {
+        Register([0; 4])
     }
 }
 
@@ -236,12 +251,38 @@ impl Instruction {
     }
 }
 
-#[derive(Debug)]
-pub struct Interpreter;
+#[derive(Debug, Clone, PartialEq)]
+pub struct Interpreter {
+    opcodes: HashMap<OpCode, Mnemonic>,
+}
 
 impl Interpreter {
-    pub fn execute(instruction: Instruction, register: &mut Register) {
-        unimplemented!()
+    pub fn with_instruction_set(
+        instruction_set: impl IntoIterator<Item = (OpCode, Mnemonic)>,
+    ) -> Self {
+        Self {
+            opcodes: HashMap::from_iter(instruction_set.into_iter()),
+        }
+    }
+
+    pub fn execute(&self, instruction: Instruction, register: &mut Register) -> Result<(), String> {
+        let &mnemonic = self.opcodes.get(&instruction.opcode).ok_or_else(|| {
+            format!(
+                "unsupported opcode {} in instruction {}",
+                instruction.opcode, instruction
+            )
+        })?;
+
+        execute_mnemonic(mnemonic, instruction, register);
+
+        Ok(())
+    }
+
+    pub fn run(&self, program: &[Instruction], register: &mut Register) -> Result<(), String> {
+        for &instruction in program {
+            self.execute(instruction, register)?;
+        }
+        Ok(())
     }
 }
 
@@ -311,7 +352,7 @@ fn execute_mnemonic(
     }
 }
 
-pub fn decode_sample(sample: Sample) -> Vec<Mnemonic> {
+fn possible_mnemonics(sample: Sample) -> Vec<Mnemonic> {
     let mut possible_mnemonics = Vec::default();
     for &mnemonic in INSTRUCTION_SET {
         let mut register = sample.before;
@@ -321,6 +362,39 @@ pub fn decode_sample(sample: Sample) -> Vec<Mnemonic> {
         }
     }
     possible_mnemonics
+}
+
+fn decode_opcodes(samples: &[Sample]) -> HashMap<OpCode, Mnemonic> {
+    let mut opcodes: HashMap<OpCode, Mnemonic> = HashMap::with_capacity(16);
+    let mut mnemonics: HashMap<OpCode, HashSet<Mnemonic>> = HashMap::with_capacity(16);
+    for &sample in samples {
+        mnemonics
+            .entry(sample.instruction.opcode)
+            .or_insert_with(HashSet::default)
+            .extend(possible_mnemonics(sample));
+    }
+    while !mnemonics.is_empty() {
+        debug!("{:?}\n", mnemonics);
+        debug!("opcodes: {:?}\n\n", opcodes);
+        let clarified_opcodes: Vec<(OpCode, Mnemonic)> = mnemonics
+            .iter()
+            .filter_map(|(&opc, mnes)| {
+                if mnes.len() == 1 {
+                    Some((opc, *mnes.iter().next().unwrap()))
+                } else {
+                    None
+                }
+            })
+            .collect();
+        for (opc, mnem) in clarified_opcodes {
+            mnemonics.values_mut().for_each(|mnes| {
+                mnes.remove(&mnem);
+            });
+            opcodes.insert(opc, mnem);
+        }
+        mnemonics.retain(|_, mnes| !mnes.is_empty());
+    }
+    opcodes
 }
 
 fn parse_register(s: &str) -> Result<Register, String> {
@@ -410,9 +484,20 @@ pub fn num_samples_behaving_like_three_or_more_opcodes(
     samples
         .iter()
         .cloned()
-        .map(decode_sample)
+        .map(possible_mnemonics)
         .filter(|ops| ops.len() >= 3)
         .count()
+}
+
+#[aoc(day16, part2)]
+pub fn run_program((samples, program): &(Vec<Sample>, Vec<Instruction>)) -> Register {
+    let opcodes = decode_opcodes(samples);
+    let mut register = Register::default();
+    let interpreter = Interpreter::with_instruction_set(opcodes);
+    interpreter
+        .run(program, &mut register)
+        .unwrap_or_else(|err| println!("error executing program: {}", err));
+    register
 }
 
 #[cfg(test)]
