@@ -405,7 +405,7 @@ mod position {
     proptest! {
         #[test]
         fn position_at_north_edge_has_no_north_adjacent(
-            x in MIN_COORDINATE..=MAX_COORDINATE
+            x in MIN_COORD..=MAX_COORD
         ) {
             let mut position = Position::MIN;
             position.x = x;
@@ -417,7 +417,7 @@ mod position {
     proptest! {
         #[test]
         fn position_at_south_edge_has_no_south_adjacent(
-            x in MIN_COORDINATE..=MAX_COORDINATE
+            x in MIN_COORD..=MAX_COORD
         ) {
             let mut position = Position::MAX;
             position.x = x;
@@ -429,7 +429,7 @@ mod position {
     proptest! {
         #[test]
         fn position_at_east_edge_has_no_east_adjacent(
-            y in MIN_COORDINATE..=MAX_COORDINATE
+            y in MIN_COORD..=MAX_COORD
         ) {
             let mut position = Position::MAX;
             position.y = y;
@@ -441,7 +441,7 @@ mod position {
     proptest! {
         #[test]
         fn position_at_west_edge_has_no_west_adjacent(
-            y in MIN_COORDINATE..=MAX_COORDINATE
+            y in MIN_COORD..=MAX_COORD
         ) {
             let mut position = Position::MIN;
             position.y = y;
@@ -453,10 +453,10 @@ mod position {
     proptest! {
         #[test]
         fn manhattan_distance_is_commutative(
-            x1 in MIN_COORDINATE..=MAX_COORDINATE / 2,
-            y1 in MIN_COORDINATE..=MAX_COORDINATE / 2,
-            x2 in MIN_COORDINATE..=MAX_COORDINATE / 2,
-            y2 in MIN_COORDINATE..=MAX_COORDINATE / 2,
+            x1 in MIN_COORD..=MAX_COORD / 2,
+            y1 in MIN_COORD..=MAX_COORD / 2,
+            x2 in MIN_COORD..=MAX_COORD / 2,
+            y2 in MIN_COORD..=MAX_COORD / 2,
         ) {
             let pos1 = Position { x: x1, y: y1 };
             let pos2 = Position { x: x2, y: y2 };

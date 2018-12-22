@@ -563,27 +563,27 @@ impl<T: Unit> IdSequence<T> {
     }
 }
 
-pub type Coordinate = usize;
-pub const MAX_COORDINATE: Coordinate = std::usize::MAX;
-pub const MIN_COORDINATE: Coordinate = std::usize::MIN;
+pub type Coord = usize;
+pub const MAX_COORD: Coord = std::usize::MAX;
+pub const MIN_COORD: Coord = std::usize::MIN;
 
 pub type Distance = usize;
 pub const MAX_DISTANCE: Distance = std::usize::MAX;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Position {
-    pub x: Coordinate,
-    pub y: Coordinate,
+    pub x: Coord,
+    pub y: Coord,
 }
 
 impl Position {
-    const MAX: Position = Position {
-        x: std::usize::MAX,
-        y: std::usize::MAX,
+    pub const MAX: Position = Position {
+        x: MAX_COORD,
+        y: MAX_COORD,
     };
-    const MIN: Position = Position {
-        x: std::usize::MIN,
-        y: std::usize::MIN,
+    pub const MIN: Position = Position {
+        x: MIN_COORD,
+        y: MIN_COORD,
     };
 }
 
@@ -618,12 +618,12 @@ impl PartialOrd for Position {
 }
 
 impl Position {
-    pub fn new(x: Coordinate, y: Coordinate) -> Self {
+    pub fn new(x: Coord, y: Coord) -> Self {
         Self { x, y }
     }
 
     pub fn north(self) -> Option<Self> {
-        if self.y > MIN_COORDINATE {
+        if self.y > MIN_COORD {
             Some(Position {
                 x: self.x,
                 y: self.y - 1,
@@ -634,7 +634,7 @@ impl Position {
     }
 
     pub fn south(self) -> Option<Self> {
-        if self.y < MAX_COORDINATE {
+        if self.y < MAX_COORD {
             Some(Position {
                 x: self.x,
                 y: self.y + 1,
@@ -645,7 +645,7 @@ impl Position {
     }
 
     pub fn east(self) -> Option<Self> {
-        if self.x < MAX_COORDINATE {
+        if self.x < MAX_COORD {
             Some(Position {
                 x: self.x + 1,
                 y: self.y,
@@ -656,7 +656,7 @@ impl Position {
     }
 
     pub fn west(self) -> Option<Self> {
-        if self.x > MIN_COORDINATE {
+        if self.x > MIN_COORD {
             Some(Position {
                 x: self.x - 1,
                 y: self.y,
