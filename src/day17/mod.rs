@@ -209,6 +209,7 @@ use std::{
     iter::FromIterator,
 };
 
+use self::Drops::*;
 use self::Matter::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -216,6 +217,7 @@ pub enum Matter {
     Sand,
     Clay,
     Water,
+    Drop,
 }
 
 impl Display for Matter {
@@ -223,16 +225,17 @@ impl Display for Matter {
         let symbol = match *self {
             Sand => ".",
             Clay => "#",
-            Water => "O",
+            Water => "~",
+            Drop => "|",
         };
         f.write_str(symbol)
     }
 }
 
-pub type Coord = i16;
+pub type Coord = u16;
 
-pub const MAX_COORD: Coord = std::i16::MAX;
-pub const MIN_COORD: Coord = std::i16::MIN;
+pub const MAX_COORD: Coord = std::u16::MAX;
+pub const MIN_COORD: Coord = std::u16::MIN;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Position {
@@ -297,7 +300,7 @@ pub struct Scan {
 
 impl Display for Scan {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        format_tiles(&self.tiles, f)
+        format_tiles(Spring::default().0, &self.tiles, f)
     }
 }
 
@@ -317,105 +320,196 @@ impl Scan {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Drops {
+    Down,
+    LeftRight(Coord, Coord),
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct WaterCourse {
-    spring: Spring,
     max_y: Coord,
+    spring: Position,
     tiles: HashMap<Position, Matter>,
-    to_check: Vec<(Position, bool)>,
+    water: Vec<(Position, Drops)>,
 }
 
 impl WaterCourse {
-    fn new(tiles: HashMap<Position, Matter>, spring: Spring, max_y: Coord) -> Self {
-        let mut to_check = Vec::with_capacity(8);
-        to_check.push((Position::new(spring.0.x, spring.0.y + 1), true));
+    fn new(tiles: HashMap<Position, Matter>, Spring(spring): Spring, max_y: Coord) -> Self {
+        let mut water = Vec::with_capacity(4);
+        water.push((Position::new(spring.x, spring.y + 1), Down));
         Self {
-            spring,
             max_y,
+            spring,
             tiles,
-            to_check,
+            water,
         }
     }
 
     pub fn area(&self) -> (Position, Position) {
         area_of_tiles(&self.tiles)
     }
+
+    pub fn tiles(&self) -> &HashMap<Position, Matter> {
+        &self.tiles
+    }
 }
 
 impl Iterator for WaterCourse {
-    type Item = Position;
+    type Item = ();
 
     fn next(&mut self) -> Option<Self::Item> {
-        debug!("{:?}", self.to_check);
-        while let Some((c_pos, is_spring)) = self.to_check.pop() {
-            let below = Position::new(c_pos.x, c_pos.y + 1);
-            if self.tiles.contains_key(&below) {
-                if is_spring && c_pos.y > 0 {
-                    let upper = Position::new(c_pos.x, c_pos.y - 1);
-                    self.to_check.push((upper, true));
-                }
-                let left = Position::new(c_pos.x - 1, c_pos.y);
-                let left_matter = self.tiles.get(&left);
-                let right = Position::new(c_pos.x + 1, c_pos.y);
-                let right_matter = self.tiles.get(&right);
-                match (left_matter, right_matter) {
-                    (None, None)
-                    | (None, Some(Sand))
-                    | (Some(Sand), None)
-                    | (Some(Sand), Some(Sand)) => {
-                        if is_spring {
-                            self.to_check.pop();
-                            self.to_check.push((c_pos, true));
-                        }
-                        self.to_check.push((right, false));
-                        self.to_check.push((left, false));
-                    },
-                    (None, Some(_)) | (Some(Sand), Some(_)) => {
-                        self.to_check.push((left, false));
-                    },
-                    (Some(_), None) | (Some(_), Some(Sand)) => {
-                        self.to_check.push((right, false));
-                    },
-                    (Some(_), Some(_)) => {},
-                }
-                if self.tiles.insert(c_pos, Water) != None {
-                    continue;
-                }
-                return Some(c_pos);
-            } else {
-                if let Some((_, true)) = self.to_check.last() {
-                    self.to_check.pop();
-                }
-                if below.y <= self.max_y {
-                    self.to_check.push((below, true));
-                }
-                self.tiles.insert(c_pos, Water);
-                return Some(c_pos);
+        debug!("{:?}", self.water);
+        let num_tiles_before = self.tiles.len();
+        let mut next_drops: Vec<(Position, Drops)> = Vec::with_capacity(2);
+        for (c_pos, drops) in self.water.drain(0..) {
+            match drops {
+                Down => {
+                    let below = Position::new(c_pos.x, c_pos.y + 1);
+                    match *self.tiles.get(&below).unwrap_or(&Sand) {
+                        Sand => {
+                            self.tiles.insert(c_pos, Drop);
+                            if below.y <= self.max_y {
+                                next_drops.push((below, Down));
+                            }
+                        },
+                        Clay => {
+                            self.tiles.insert(c_pos, Water);
+                            next_drops.push((c_pos, LeftRight(c_pos.x - 1, c_pos.x + 1)));
+                        },
+                        Water => {
+                            self.tiles.insert(c_pos, Drop);
+                            let below_below = Position::new(below.x, below.y + 1);
+                            if Some(&Drop) != self.tiles.get(&below_below) {
+                                next_drops.push((below, LeftRight(below.x - 1, below.x + 1)));
+                            }
+                        },
+                        Drop => {},
+                    }
+                },
+                LeftRight(left_x, right_x) => {
+                    let left = Position::new(left_x, c_pos.y);
+                    let right = Position::new(right_x, c_pos.y);
+                    let left_matter = *self.tiles.get(&left).unwrap_or(&Sand);
+                    let right_matter = *self.tiles.get(&right).unwrap_or(&Sand);
+                    match (left_matter, right_matter) {
+                        (Sand, Sand) | (Sand, Drop) | (Drop, Sand) | (Drop, Drop) => {
+                            let below_left = Position::new(left.x, c_pos.y + 1);
+                            let below_right = Position::new(right.x, c_pos.y + 1);
+                            let below_left_matter = *self.tiles.get(&below_left).unwrap_or(&Sand);
+                            let below_right_matter = *self.tiles.get(&below_right).unwrap_or(&Sand);
+                            match (below_left_matter, below_right_matter) {
+                                (Drop, Drop) | (Sand, Drop) | (Drop, Sand) => {},
+                                (Sand, Sand) => {
+                                    self.tiles.insert(left, Water);
+                                    self.tiles.insert(right, Water);
+                                    next_drops.push((below_left, Down));
+                                    next_drops.push((below_right, Down));
+                                },
+                                (Sand, _) => {
+                                    self.tiles.insert(right, Water);
+                                    next_drops.push((c_pos, LeftRight(left.x, right.x + 1)));
+                                },
+                                (_, Sand) => {
+                                    self.tiles.insert(left, Water);
+                                    next_drops.push((c_pos, LeftRight(left.x - 1, right.x)));
+                                },
+                                (_, _) => {
+                                    self.tiles.insert(left, Water);
+                                    self.tiles.insert(right, Water);
+                                    next_drops.push((c_pos, LeftRight(left.x - 1, right.x + 1)));
+                                },
+                            }
+                        },
+                        (Sand, _) | (Drop, _) => {
+                            self.tiles.insert(left, Water);
+                            let below_left = Position::new(left.x, c_pos.y + 1);
+                            match *self.tiles.get(&below_left).unwrap_or(&Sand) {
+                                Drop => {},
+                                Sand => {
+                                    next_drops.push((below_left, Down));
+                                },
+                                Water | Clay => {
+                                    next_drops.push((c_pos, LeftRight(left.x - 1, right.x)));
+                                },
+                            }
+                        },
+                        (_, Sand) | (_, Drop) => {
+                            self.tiles.insert(right, Water);
+                            let below_right = Position::new(right.x, c_pos.y + 1);
+                            match *self.tiles.get(&below_right).unwrap_or(&Sand) {
+                                Drop => {},
+                                Sand => {
+                                    next_drops.push((below_right, Down));
+                                },
+                                Water | Clay => {
+                                    next_drops.push((c_pos, LeftRight(left.x, right.x + 1)));
+                                },
+                            }
+                        },
+                        (Water, _) => {
+                            let below_left = Position::new(left.x, c_pos.y + 1);
+                            match *self.tiles.get(&below_left).unwrap_or(&Sand) {
+                                Drop | Sand => {},
+                                Water | Clay => {
+                                    next_drops.push((c_pos, LeftRight(left.x - 1, right.x)));
+                                },
+                            }
+                        },
+                        (_, Water) => {
+                            let below_right = Position::new(right.x, c_pos.y + 1);
+                            match *self.tiles.get(&below_right).unwrap_or(&Sand) {
+                                Drop | Sand => {},
+                                Water | Clay => {
+                                    next_drops.push((c_pos, LeftRight(left.x, right.x + 1)));
+                                },
+                            }
+                        },
+                        (Clay, Clay) => {
+                            let above = Position::new(c_pos.x, c_pos.y - 1);
+                            self.tiles.insert(above, Water);
+                            next_drops.push((above, LeftRight(c_pos.x - 1, c_pos.x + 1)));
+                        },
+                    }
+                },
             }
         }
-        None
+        self.water.extend(next_drops);
+        if self.water.is_empty() {
+            None
+        } else if self.tiles.len() == num_tiles_before {
+            self.next()
+        } else {
+            Some(())
+        }
     }
 }
 
 impl Display for WaterCourse {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        format_tiles(&self.tiles, f)
+        format_tiles(self.spring, &self.tiles, f)
     }
 }
 
-fn format_tiles(tiles: &HashMap<Position, Matter>, f: &mut fmt::Formatter) -> fmt::Result {
+fn format_tiles(
+    spring: Position,
+    tiles: &HashMap<Position, Matter>,
+    f: &mut fmt::Formatter,
+) -> fmt::Result {
     let (top_left, bottom_right) = area_of_tiles(tiles);
-    let width = (bottom_right.x - top_left.x) as usize;
     for y in 0..=bottom_right.y {
-        let mut line = String::with_capacity(width);
+        let mut line = String::with_capacity(16);
         for x in top_left.x - 1..=bottom_right.x + 1 {
             let position = Position::new(x, y);
             let symbol = if let Some(matter) = tiles.get(&position) {
                 match matter {
                     Sand => '.',
                     Clay => '#',
-                    Water => 'O',
+                    Water => '~',
+                    Drop => '|',
                 }
+            } else if position == spring {
+                '+'
             } else {
                 '.'
             };
@@ -445,7 +539,7 @@ pub fn parse(input: &str) -> Scan {
         let mut y_min = 0;
         let mut y_max = 0;
         let mut param = Value::Xmin;
-        let mut value = String::with_capacity(3);
+        let mut value = String::with_capacity(4);
 
         let mut save_value = |param: Value, value: &str| {
             let number = value.parse::<Coord>().unwrap();
@@ -508,16 +602,20 @@ pub fn parse(input: &str) -> Scan {
 #[aoc(day17, part1)]
 pub fn num_tiles_flooded_by_water(scan: &Scan) -> usize {
     let (top_left, bottom_right) = scan.area();
+    debug!("{} - {}", top_left, bottom_right);
     let mut spring = Spring::default();
     spring.0.y = top_left.y - 1;
     let mut water_walker = scan.clone().walk_water_course(spring, bottom_right.y);
-    let mut num_water_tiles = 0;
+    debug!("{}", water_walker);
     while let Some(_) = water_walker.next() {
         debug!("{}", water_walker);
-        num_water_tiles += 1;
     }
     debug!("{}", water_walker);
-    num_water_tiles
+    water_walker
+        .tiles()
+        .iter()
+        .filter(|(_, &matter)| matter == Water || matter == Drop)
+        .count()
 }
 
 #[cfg(test)]
