@@ -370,7 +370,7 @@ mod part1 {
 
         let answer = fight(&combat);
 
-        assert_eq!(answer, 181952);
+        assert_eq!(answer, 181_952);
     }
 }
 

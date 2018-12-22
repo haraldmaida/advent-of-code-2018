@@ -515,6 +515,7 @@ impl<T: Unit> Display for Id<T> {
     }
 }
 
+#[cfg_attr(feature = "cargo-clippy", allow(clippy::derive_hash_xor_eq))]
 impl<T: Unit> Hash for Id<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         <T as Unit>::NAME.hash(state);

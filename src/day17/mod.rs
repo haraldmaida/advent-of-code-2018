@@ -275,10 +275,10 @@ impl Position {
     }
 }
 
-pub fn area_of_tiles(tiles: &HashMap<Position, Matter>) -> (Position, Position) {
+pub fn area_of_tiles<'a>(tiles: impl IntoIterator<Item = &'a Position>) -> (Position, Position) {
     let mut top_left = Position::MAX;
     let mut bottom_right = Position::MIN;
-    for position in tiles.keys() {
+    for position in tiles.into_iter() {
         if position.x < top_left.x {
             top_left.x = position.x
         }
@@ -323,7 +323,7 @@ impl Scan {
     }
 
     pub fn area(&self) -> (Position, Position) {
-        area_of_tiles(&self.tiles)
+        area_of_tiles(self.tiles.keys())
     }
 
     pub fn walk_water_course(self, spring: Spring, max_y: Coord) -> WaterCourse {
@@ -358,7 +358,7 @@ impl WaterCourse {
     }
 
     pub fn area(&self) -> (Position, Position) {
-        area_of_tiles(&self.tiles)
+        area_of_tiles(self.tiles.keys())
     }
 
     pub fn tiles(&self) -> &HashMap<Position, Matter> {
@@ -507,7 +507,7 @@ fn format_tiles(
     tiles: &HashMap<Position, Matter>,
     f: &mut fmt::Formatter,
 ) -> fmt::Result {
-    let (top_left, bottom_right) = area_of_tiles(tiles);
+    let (top_left, bottom_right) = area_of_tiles(tiles.keys());
     for y in 0..=bottom_right.y {
         let mut line = String::with_capacity(16);
         for x in top_left.x - 1..=bottom_right.x + 1 {

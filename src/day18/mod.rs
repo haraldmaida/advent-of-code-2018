@@ -318,7 +318,7 @@ impl Display for Resource {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, PartialEq)]
 pub struct Area {
     resources: HashMap<Position, Resource>,
 }
@@ -418,25 +418,23 @@ impl Area {
                     OpenGround => {
                         let mut num_adj_trees = 0;
                         for adj_pos in position.adjacent() {
-                            match self.resource(adj_pos) {
-                                Trees => num_adj_trees += 1,
-                                _ => {},
-                            }
-                            if num_adj_trees >= 3 {
-                                mutated_area.resources.insert(position, Trees);
-                                break;
+                            if Trees == self.resource(adj_pos) {
+                                num_adj_trees += 1;
+                                if num_adj_trees >= 3 {
+                                    mutated_area.resources.insert(position, Trees);
+                                    break;
+                                }
                             }
                         }
                     },
                     Trees => {
                         let mut num_adj_lumberyards = 0;
                         for adj_pos in position.adjacent() {
-                            match self.resource(adj_pos) {
-                                Lumberyard => num_adj_lumberyards += 1,
-                                _ => {},
-                            }
-                            if num_adj_lumberyards >= 3 {
-                                break;
+                            if Lumberyard == self.resource(adj_pos) {
+                                num_adj_lumberyards += 1;
+                                if num_adj_lumberyards >= 3 {
+                                    break;
+                                }
                             }
                         }
                         if num_adj_lumberyards >= 3 {
@@ -450,8 +448,12 @@ impl Area {
                         let mut num_lumberyard = 0;
                         for adj_pos in position.adjacent() {
                             match self.resource(adj_pos) {
-                                Trees => num_trees += 1,
-                                Lumberyard => num_lumberyard += 1,
+                                Trees => {
+                                    num_trees += 1;
+                                },
+                                Lumberyard => {
+                                    num_lumberyard += 1;
+                                },
                                 _ => {},
                             }
                             if num_trees >= 1 && num_lumberyard >= 1 {
@@ -471,8 +473,7 @@ impl Area {
 pub fn parse(input: &str) -> Area {
     let mut area = Area::new();
     for (y, line) in input.lines().enumerate() {
-        let mut chars = line.chars().enumerate();
-        while let Some((x, chr)) = chars.next() {
+        for (x, chr) in line.chars().enumerate() {
             let resource = match chr {
                 '.' => OpenGround,
                 '|' => Trees,

@@ -327,6 +327,7 @@ impl Sample {
     }
 }
 
+#[cfg_attr(feature = "cargo-clippy", allow(clippy::unneeded_field_pattern))]
 fn execute_mnemonic(
     mnemonic: Mnemonic,
     Instruction { opcode: _, a, b, c }: Instruction,

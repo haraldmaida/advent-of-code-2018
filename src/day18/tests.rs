@@ -271,6 +271,6 @@ mod part1 {
 
         let answer = total_resource_value_after_10_minutes(&area);
 
-        assert_eq!(answer, 620624)
+        assert_eq!(answer, 620_624)
     }
 }
