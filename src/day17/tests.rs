@@ -107,3 +107,53 @@ mod part1 {
         assert_eq!(answer, 31667);
     }
 }
+
+mod part2 {
+    use super::*;
+
+    #[test]
+    fn example1() {
+        let scan = parse(EXAMPLE1_INPUT);
+
+        let answer = num_tiles_flooded_by_water_after_spring_has_run_dry(&scan);
+
+        assert_eq!(answer, 29);
+    }
+
+    #[test]
+    fn example2() {
+        let scan = parse(EXAMPLE2_INPUT);
+
+        let answer = num_tiles_flooded_by_water_after_spring_has_run_dry(&scan);
+
+        assert_eq!(answer, 36);
+    }
+
+    #[test]
+    fn example3() {
+        let scan = parse(EXAMPLE3_INPUT);
+
+        let answer = num_tiles_flooded_by_water_after_spring_has_run_dry(&scan);
+
+        assert_eq!(answer, 264);
+    }
+
+    #[test]
+    fn example4() {
+        let scan = parse(EXAMPLE4_INPUT);
+
+        let answer = num_tiles_flooded_by_water_after_spring_has_run_dry(&scan);
+
+        assert_eq!(answer, 265);
+    }
+
+    #[ignore]
+    #[test]
+    fn answer() {
+        let scan = parse(INPUT);
+
+        let answer = num_tiles_flooded_by_water_after_spring_has_run_dry(&scan);
+
+        assert_eq!(answer, 31667);
+    }
+}

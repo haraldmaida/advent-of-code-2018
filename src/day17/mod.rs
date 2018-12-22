@@ -201,6 +201,17 @@
 //! How many tiles can the water reach within the range of y values in your
 //! scan?
 //!
+//! ## Part 2
+//!
+//! After a very long time, the water spring will run dry. How much water will
+//! be retained?
+//!
+//! In the example above, water that won't eventually drain out is shown as ~, a
+//! total of 29 tiles.
+//!
+//! How many water tiles are left after the water spring stops producing water
+//! and all remaining water not at rest has drained?
+//!
 //! [Advent of Code 2018 - Day 17](https://adventofcode.com/2018/day/17)
 
 use std::{
@@ -615,6 +626,25 @@ pub fn num_tiles_flooded_by_water(scan: &Scan) -> usize {
         .tiles()
         .iter()
         .filter(|(_, &matter)| matter == Water || matter == Drop)
+        .count()
+}
+
+#[aoc(day17, part2)]
+pub fn num_tiles_flooded_by_water_after_spring_has_run_dry(scan: &Scan) -> usize {
+    let (top_left, bottom_right) = scan.area();
+    debug!("{} - {}", top_left, bottom_right);
+    let mut spring = Spring::default();
+    spring.0.y = top_left.y - 1;
+    let mut water_walker = scan.clone().walk_water_course(spring, bottom_right.y);
+    debug!("{}", water_walker);
+    while let Some(_) = water_walker.next() {
+        debug!("{}", water_walker);
+    }
+    println!("{}", water_walker);
+    water_walker
+        .tiles()
+        .iter()
+        .filter(|(_, &matter)| matter == Water)
         .count()
 }
 
