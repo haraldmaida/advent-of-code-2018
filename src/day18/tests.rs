@@ -262,7 +262,7 @@ mod part1 {
 
         let answer = total_resource_value_after_10_minutes(&area);
 
-        assert_eq!(answer, 1147)
+        assert_eq!(answer, 1147);
     }
 
     #[test]
@@ -271,6 +271,19 @@ mod part1 {
 
         let answer = total_resource_value_after_10_minutes(&area);
 
-        assert_eq!(answer, 620_624)
+        assert_eq!(answer, 620_624);
+    }
+}
+
+mod part2 {
+    use super::*;
+
+    #[test]
+    fn answer() {
+        let area = parse(INPUT);
+
+        let answer = total_resource_value_after_1_000_000_000_minutes(&area);
+
+        assert_eq!(answer, 169_234);
     }
 }

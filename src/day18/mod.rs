@@ -178,6 +178,14 @@
 //! What will the total resource value of the lumber collection area be after 10
 //! minutes?
 //!
+//! ## Part 2
+//!
+//! This important natural resource will need to last for at least thousands of
+//! years. Are the Elves collecting this lumber sustainably?
+//!
+//! What will the total resource value of the lumber collection area be after
+//! 1000000000 minutes?
+//!
 //! [Advent of Code 2018 - Day 18](https://adventofcode.com/2018/day/18)
 
 use std::{
@@ -402,11 +410,45 @@ impl Area {
 
     pub fn nth_generation(self, n: usize) -> Area {
         let (top_left, bottom_right) = self.corners();
-        let mut area = self;
-        for _ in 0..n {
-            area = area.next_generation(top_left, bottom_right);
+        if n < 1_000 {
+            let mut area = self;
+            for no in 1..=n {
+                area = area.next_generation(top_left, bottom_right);
+                debug!("\n\ngeneration no. {}:\n\n{}", no, area);
+            }
+            area
+        } else {
+            let mut break_at_no = n + 1;
+            let mut prove = break_at_no;
+            let mut first_cycle_start = 1;
+            let mut repeat_cycle = 1;
+            let mut seen_pattern = HashMap::with_capacity(16);
+            let mut area = self;
+            seen_pattern.insert(area.to_string(), 0);
+            for no in 1..=n {
+                area = area.next_generation(top_left, bottom_right);
+                let pattern = area.to_string();
+                if let Some(prev) = seen_pattern.insert(pattern, no) {
+                    let difference = no - prev;
+                    if difference != repeat_cycle {
+                        repeat_cycle = difference;
+                        first_cycle_start = prev;
+                        prove = first_cycle_start + repeat_cycle * 4;
+                    }
+                    debug!(
+                        "\n\n{} - {} -- ({}, {}):\n\n{}",
+                        no, prev, first_cycle_start, repeat_cycle, area
+                    );
+                }
+                if no == break_at_no {
+                    break;
+                }
+                if no == prove {
+                    break_at_no = (n - first_cycle_start) % repeat_cycle + no;
+                }
+            }
+            area
         }
-        area
     }
 
     fn next_generation(&self, top_left: Position, bottom_right: Position) -> Area {
@@ -492,6 +534,12 @@ pub fn parse(input: &str) -> Area {
 #[aoc(day18, part1)]
 pub fn total_resource_value_after_10_minutes(area: &Area) -> usize {
     let new_area = area.clone().nth_generation(10);
+    new_area.count_resource(Trees) * new_area.count_resource(Lumberyard)
+}
+
+#[aoc(day18, part2)]
+pub fn total_resource_value_after_1_000_000_000_minutes(area: &Area) -> usize {
+    let new_area = area.clone().nth_generation(1_000_000_000);
     new_area.count_resource(Trees) * new_area.count_resource(Lumberyard)
 }
 
