@@ -137,6 +137,7 @@ use std::{
     fmt::{self, Display},
     iter::FromIterator,
     ops::{Index, IndexMut},
+    str::FromStr,
 };
 
 use self::Mnemonic::*;
@@ -164,6 +165,56 @@ pub enum Mnemonic {
 const INSTRUCTION_SET: &[Mnemonic] = &[
     AddR, AddI, MulR, MulI, BanR, BanI, BorR, BorI, SetR, SetI, GtIR, GtRI, GtRR, EqIR, EqRI, EqRR,
 ];
+
+impl Display for Mnemonic {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let display = match *self {
+            AddR => "addr",
+            AddI => "addi",
+            MulR => "mulr",
+            MulI => "muli",
+            BanR => "banr",
+            BanI => "bani",
+            BorR => "borr",
+            BorI => "bori",
+            SetR => "setr",
+            SetI => "seti",
+            GtIR => "gtir",
+            GtRI => "gtri",
+            GtRR => "gtrr",
+            EqIR => "eqir",
+            EqRI => "eqri",
+            EqRR => "eqrr",
+        };
+        f.write_str(display)
+    }
+}
+
+impl FromStr for Mnemonic {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s {
+            "addr" => AddR,
+            "addi" => AddI,
+            "mulr" => MulR,
+            "muli" => MulI,
+            "banr" => BanR,
+            "bani" => BanI,
+            "borr" => BorR,
+            "bori" => BorI,
+            "setr" => SetR,
+            "seti" => SetI,
+            "gtir" => GtIR,
+            "gtri" => GtRI,
+            "gtrr" => GtRR,
+            "eqir" => EqIR,
+            "eqri" => EqRI,
+            "eqrr" => EqRR,
+            _ => return Err(format!("unknown opcode {:?}", s)),
+        })
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct OpCode(pub u8);
