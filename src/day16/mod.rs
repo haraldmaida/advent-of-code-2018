@@ -225,7 +225,7 @@ impl Display for OpCode {
     }
 }
 
-pub type Data = i32;
+pub type Data = u64;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Register([Data; 4]);

@@ -191,21 +191,24 @@ impl Interpreter {
         Self { ip_reg, ip: 0 }
     }
 
+    #[inline]
     pub fn execute(&mut self, instruction: Instruction, register: &mut Register) {
         register[self.ip_reg] = self.ip;
         execute_mnemonic(instruction, register);
-        self.ip = register[self.ip_reg];
-        self.ip += 1;
+        self.ip = register[self.ip_reg] + 1;
     }
 
     pub fn run(&mut self, program: &[Instruction], register: &mut Register) -> Result<(), String> {
-        loop {
-            if self.ip as usize >= program.len() {
-                return Ok(());
+        while let Some(&instruction) = program.get(self.ip as usize) {
+            if self.ip == 3 {
+                self.ip = optimized(register);
+                continue;
             }
-            let instruction = program[self.ip as usize];
+            let _c_ip = self.ip;
             self.execute(instruction, register);
+            //_trace(_c_ip, instruction, register);
         }
+        Ok(())
     }
 }
 
@@ -227,6 +230,28 @@ fn execute_mnemonic(Instruction { opcode, a, b, c }: Instruction, reg: &mut Regi
         EqIR => reg[c] = if a == reg[b] { 1 } else { 0 },
         EqRI => reg[c] = if reg[a] == b { 1 } else { 0 },
         EqRR => reg[c] = if reg[a] == reg[b] { 1 } else { 0 },
+    }
+}
+
+#[inline]
+fn _trace(ip: Addr, Instruction { opcode, a, b, c }: Instruction, reg: &Register) {
+    match opcode {
+        AddR => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        AddI => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        MulR => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        MulI => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        BanR => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        BanI => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        BorR => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        BorI => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        SetR => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        SetI => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        GtIR => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        GtRI => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        GtRR => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        EqIR => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        EqRI => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
+        EqRR => println!("{:02}: {} {} {} {} : {} ", ip, opcode, a, b, c, reg),
     }
 }
 
@@ -296,6 +321,48 @@ pub fn run_background_process(program: &Program) -> Data {
         .run(program.instructions(), &mut register)
         .unwrap();
     register[0]
+}
+
+#[aoc(day19, part2)]
+pub fn run_background_process_2(program: &Program) -> Data {
+    let mut interpreter = Interpreter::new(program.ip_reg);
+    let mut register = Register::default();
+    register[0] = 1;
+    interpreter
+        .run(program.instructions(), &mut register)
+        .unwrap();
+    register[0]
+}
+
+/// Repeated loop:
+///
+/// ```text
+/// 'L1:  R1 = R5 * R2
+///       if R4 == R1 then
+///         R1 = 1
+///         R0 = R5 + R0
+///       else
+///         R1 = 0
+///       end if
+///       R3 = R1 + R3
+///       R2 = R2 + 1
+///       if R2 > R4 then
+///         R1 = 1
+///         R3 = R3 + 1  // goto 'L2
+///       else
+///         R1 = 0
+///         R3 = R3 + R1
+///         R3 = 2  // goto 'L1
+///       end if
+/// 'L2:
+/// ```
+fn optimized(reg: &mut Register) -> Addr {
+    if reg[4] % reg[5] == 0 {
+        reg[0] = reg[5] + reg[0];
+    }
+    reg[2] = reg[4];
+    reg[1] = 0;
+    12
 }
 
 #[cfg(test)]

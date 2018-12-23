@@ -94,3 +94,16 @@ mod part1 {
         assert_eq!(answer, 1056);
     }
 }
+
+mod part2 {
+    use super::*;
+
+    #[test]
+    fn answer() {
+        let program = parse(INPUT).unwrap();
+
+        let answer = run_background_process_2(&program);
+
+        assert_eq!(answer, 10_915_260);
+    }
+}
