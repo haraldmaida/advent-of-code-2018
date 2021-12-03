@@ -181,7 +181,7 @@ pub fn parse(input: &str) -> Vec<Claim> {
         .enumerate()
         .map(|(idx, line)| match Claim::from_str(line) {
             Ok(claim) => claim,
-            Err(err) => panic!(format!("error at line {}: {:?}", idx + 1, err)),
+            Err(err) => panic!("error at line {}: {:?}", idx + 1, err),
         })
         .collect()
 }

@@ -592,7 +592,7 @@ pub fn parse(input: &str) -> Scan {
                 '=' => {},
                 _ if chr.is_digit(10) => value.push(chr),
                 _ if chr.is_whitespace() => {},
-                _ => panic!(format!("unexpected character {} in line {}", chr, line)),
+                _ => panic!("unexpected character {} in line {}", chr, line),
             }
         }
         if !value.is_empty() {
