@@ -1,3 +1,5 @@
+__NOTE: THE CONTENT OF THIS PROJECT HAS BEEN MERGED INTO THE [advent-of-code](https://github.com/haraldmaida/advent-of-code) REPOSITORY__
+
 # Advent of Code 2018 in Rust
 
 Solving the [Advent of Code 2018] puzzles in Rust.
